@@ -1,0 +1,535 @@
+{
+  "episodes": [
+    {
+      "title": "Bonus Bang Series",
+      "pageid": 8957
+    },
+    {
+      "title": "CBB Presents",
+      "pageid": 8222
+    },
+    {
+      "title": "1-800 Jingles",
+      "pageid": 7490,
+      "name": "1-800 Jingles",
+      "number": "560",
+      "image": "560.jpg",
+      "imagewidth": "200px",
+      "Releasedate": "August 12, 2018",
+      "Host": "[[Scott Aukerman]]",
+      "Guests": "[[Ben Schwartz]]<br>\n[[Jessica McKenna]]<br>\n[[Will Hines]]",
+      "Characters": "[[Phil Shorts]]<br>\n[[Hypnoto the Mesmerist]]<br>\n[[Morpheus, The Dream Lord]]",
+      "previous": "[[Jen and Berry\u2019s Frozen Ice]]",
+      "next": "[[Poke Mitzvah]]"
+    },
+    {
+      "title": "10th Anniversary Part 1",
+      "pageid": 7661,
+      "name": "10th Anniversary Part 1",
+      "number": "599",
+      "image": "599.jpg",
+      "imagewidth": "200px",
+      "Releasedate": "April 28, 2019",
+      "Host": "[[Scott Aukerman]]",
+      "Guests": "[[Jason Mantzoukas]]<br>\n[[Andy Daly]]<br>\n[[Paul F. Tompkins]]<br>\n[[Seth Morris]]<br>\n[[Jon Hamm]]<br>\n[[Lauren Lapkus]]<br>\n[[Jessica McKenna]]<br>\n[[Zach Reino]]<br>\n[[Jon Gabrus]]<br>\n[[Ego Nwodim]]<br>\n[[Zeke Nicholson]]<br>\n[[Carl Tart]]<br>\n[[Rob Huebel]]<br>\n[[Thomas Lennon]]<br>\n[[Matt Besser]]<br>\n[[Paul Scheer]]<br>\n[[Tawny Newsome]]<br>\n[[Madeline Walter]]<br>\n[[Taran Killam]]<br>\n[[Paul Brittain]]<br>\n[[Ryan Gaul]]",
+      "Characters": "[[Hot Dog]]<br>\n[[Dalton Wilcox]]<br>\n[[Lord Andrew Lloyd Webber]]<br>\n[[Bob Ducca]]<br>\n[[Todd]]<br>\n[[Beth]]<br>\n[[Dash Grabum]]<br>\n[[Gino Lambardo]]<br>\n[[Entr\u00e9e PeeE Neur]]<br>\n[[Prince Chinedu]]<br>\n[[B.Q.|Bone Queef]]<br>\n[[Kiwi Kris]]<br>\n[[MC Sugar Butt]]<br>\n[[The Chief]]<br>\n[[Lil' Gary]]<br>\n[[Bjork]]<br>\n[[Chip Garvey]]<br>\n[[Gary Urbansky]]<br>\n[[The Rum Tum Tugger]]<br>\n[[Charles Manson]]<br>\n[[Bever Hopox]]<br>\n[[Chico Hands]]<br>\n[[Bisby St. Hancock]]",
+      "previous": "[[Secret Shopping with Motley Crue]]",
+      "next": "[[10th Anniversary Part 2]]"
+    },
+    {
+      "title": "10th Anniversary Part 2",
+      "pageid": 7662,
+      "name": "10th Anniversary Part 2",
+      "number": "599.5",
+      "image": "599.5.png",
+      "imagewidth": "200px",
+      "Releasedate": "April 28, 2019",
+      "Host": "[[Scott Aukerman]]",
+      "Guests": "[[Thomas Middleditch]]<br>\n[[Adam Scott]]<br>\n[[Chelsea Peretti]]<br>\n[[Nick Kroll]]<br>\n[[Drew Tarver]]<br>\n[[Weird Al Yankovic]]<br>\n[[Paul Rust]]<br>\n[[Neil Campbell]]<br>\n[[Bobby Moynihan]]<br>\n[[Mary Holland]]<br>\n[[Horatio Sanz]]<br>\n[[Ben Schwartz]]<br>\n[[Jon Daly]]<br>\n[[Shaun Diston]]<br>\n[[Mike Hanford]]<br>\n[[Will Hines]]<br>\n[[Brendon Small]]<br>\n[[Jessica St. Clair]]<br>\n[[Lennon Parham]]<br>\n[[James Adomian]]",
+      "Characters": "[[Joey Tortellini]]<br>\n[[Fabrice Fabrice]]<br>\n[[Martin Sheffield Lickly]]<br>\n[[Ernie Bread]]<br>\n[[Mr. Bread]]<br>\n[[Mama Bread]]<br>\n[[Fourvel]]<br>\n[[Batman]]<br>\n[[Eugenia Wobbles]]<br>\n[[Mall McCartney]]<br>\n[[Rudi North]]<br>\n[[Judy North]]<br>\n[[John Lennon]]<br>\n[[Randy Useless]]<br>\n[[Captain Moustache]]<br>\n[[Marissa Wompler]]<br>\n[[Miss Listler]]<br>\n[[Jesse Ventura]]<br>\n[[Huell Howser]]",
+      "previous": "[[10th Anniversary Part 1]]",
+      "next": "[[Patrick McMahon Returns: A Story About Johnny McGory]]"
+    },
+    {
+      "title": "2 Rat 2 Touille",
+      "pageid": 8953,
+      "name": "2 Rat 2 Touille",
+      "image": "927.webp",
+      "imagewidth": "200px",
+      "number": "927",
+      "Releasedate": "August 4, 2025",
+      "Host": "[[Scott Aukerman]]",
+      "Guests": "[[Patton Oswalt]]<br>\n[[Eddie Pepitone]]<br>\n[[Carl Tart]]<br>\n[[Rekha Shankar]]",
+      "Characters": "[[Tootie Rivers]]<br>\n[[Mumps]]<br>\n[[Kevin Tutulio]]<br>\n[[O. J. Simpson]]",
+      "previous": "[[May The Labubu Be With You]]",
+      "next": "[[Sixteen Toilets And Another Day Older]]"
+    },
+    {
+      "title": "2011 Holiday Spectacular",
+      "pageid": 3034,
+      "image": "",
+      "imagewidth": "200",
+      "number": "136",
+      "Host": "[[Scott Aukerman]]",
+      "Guests": "[[Jon Daly]]<br>[[Brett Gelman]]<br>[[Paul F. Tompkins]]<br>[[Tom Lennon]]<br>[[Nick Kroll]]<br>[[Seth Morris]]<br>[[Adam Pally]]<br>[[Harris Wittels]]<br>[[James Adomian]]",
+      "Characters": "[[Huell Howser]]<br>\n[[Jesse Ventura]]<br>\n[[El Chupacabra]]<br>\n[[Billy Crystal]]<br>\n[[Bob Ducca]]<br>\n[[Bill Cosby-Bukowski]]<br>\n[[Lord Andrew Lloyd Webber]]<br>\n[[Lil' Gary]]<br>\n[[Dr. Frasier Boss]]",
+      "name": "2011 Holiday Spectacular",
+      "Releasedate": "December 19, 2011",
+      "previous": "[[Scavenge and the Wiseman]]",
+      "next": "[[Best of 2011 Pt. 1]]"
+    },
+    {
+      "title": "2012 Holiday Spectacular",
+      "pageid": 3258,
+      "name": "2012 Holiday Spectacular",
+      "image": "191.jpg",
+      "imagewidth": "200",
+      "number": "191",
+      "Releasedate": "December 17, 2012",
+      "Host": "[[Scott Aukerman]]",
+      "Guests": "[[Harris Wittels]]<br>\n[[Paul Rust]]<br>\n[[Matt Besser]]<br>\n[[Paul F. Tompkins]]<br>\n[[Jon Daly]]<br>\n[[Nick Kroll]]",
+      "Characters": "[[Bjork]]<br>\n[[Ice-T]]<br>\n[[Bill Cosby-Bukowski]]<br>\n[[Liz]]<br>\n[[Dr. Frasier Boss]]",
+      "previous": "[[You Know What I Mean?]]",
+      "next": "[[Best of 2012 Pt. 1]]"
+    },
+    {
+      "title": "2012 Tour, Boston",
+      "pageid": 3712,
+      "name": "2012 Tour, Boston",
+      "number": "from the road",
+      "Releasedate": "August 6, 2012",
+      "Host": "[[Scott Aukerman]]",
+      "Guests": "[[Tim Heidecker]]<br>\n[[Taran Killam]]<br>\n[[James Adomian]]",
+      "Characters": "[[Curiosity Mars Rover]]<br>\n[[The Sheriff of Nottingham]]",
+      "previous": "[[2012 Tour, Los Angeles]]",
+      "next": "[[2012 Tour, New York Pt. 1]]"
+    },
+    {
+      "title": "2012 Tour, Chicago Pt. 1",
+      "pageid": 3667,
+      "name": "2012 Tour, Chicago Pt. 1",
+      "number": "from the road",
+      "Releasedate": "July 30, 2012",
+      "Host": "[[Scott Aukerman]]",
+      "Guests": "[[Matt Besser]]<br>[[James Adomian]]",
+      "Characters": "[[Huanhuan the Olympic Mascot]]<br>[[Merrill Shindler]]",
+      "previous": "[[2012 Tour, Minneapolis]]",
+      "next": "[[2012 Tour, Chicago Pt. 2]]"
+    },
+    {
+      "title": "2012 Tour, Chicago Pt. 2",
+      "pageid": 3685,
+      "name": "2012 Tour, Chicago Pt. 2",
+      "number": "from the road",
+      "Releasedate": "July 30, 2012",
+      "Host": "[[Scott Aukerman]]",
+      "Guests": "[[Matt Besser]]<br>[[James Adomian]]",
+      "Characters": "[[Michael Phelps]]<br>[[Gary Busey]]",
+      "previous": "[[2012 Tour, Chicago Pt. 1]]",
+      "next": "[[2012 Tour, Seattle]]"
+    },
+    {
+      "title": "2012 Tour, Los Angeles",
+      "pageid": 3708,
+      "name": "2012 Tour, Los Angeles",
+      "number": "from the road",
+      "Releasedate": "August 4, 2012",
+      "Host": "[[Scott Aukerman]]",
+      "Guests": "[[Harris Wittels]]<br>\n[[Adam Scott]]<br>\n[[Andy Daly]]<br>\n[[Nick Kroll]]<br>\n[[James Adomian]]",
+      "Characters": "[[Chip Gardner]]<br>\n[[El Chupacabra]]<br>\n[[Paul Giamatti]]<br>\n[[Brennis Dentmintsontinmen]]<br>\n[[John Shantally]]",
+      "previous": "[[2012 Tour, San Francisco]]",
+      "next": "[[2012 Tour, Boston]]"
+    },
+    {
+      "title": "2012 Tour, Minneapolis",
+      "pageid": 3664,
+      "name": "2012 Tour, Minneapolis",
+      "number": "from the road",
+      "Releasedate": "July 29, 2012",
+      "Host": "[[Scott Aukerman]]",
+      "Guests": "[[Matt Besser]]<br>[[James Adomian]]",
+      "Characters": "[[Bjork]]<br>[[Jesse Ventura]]",
+      "previous": "[[2012 Tour, San Diego]]",
+      "next": "[[2012 Tour, Chicago Pt. 1]]"
+    },
+    {
+      "title": "2012 Tour, New York Pt. 1",
+      "pageid": 3719,
+      "name": "2012 Tour, New York Pt. 1",
+      "number": "from the road",
+      "Releasedate": "August 7, 2012",
+      "Host": "[[Scott Aukerman]]",
+      "Guests": "[[Kurt Braunohler]]<br>\n[[James Adomian]]<br>\n[[Bobby Moynihan]]",
+      "Characters": "[[Jesse Ventura]]<br>\n[[Fourvel]]",
+      "previous": "[[2012 Tour, Boston]]",
+      "next": "[[2012 Tour, New York Pt. 2]]"
+    },
+    {
+      "title": "2012 Tour, New York Pt. 2",
+      "pageid": 3720,
+      "name": "2012 Tour, New York Pt. 2",
+      "number": "from the road",
+      "Releasedate": "August 7, 2012",
+      "Host": "[[Scott Aukerman]]",
+      "Guests": "[[Tim Heidecker]]<br>\n[[Bobby Moynihan]]<br>\n[[James Adomian]]",
+      "Characters": "[[Fagin Platt]]<br>\n[[Charles Barkley]]<br>\n[[Huell Howser]]",
+      "previous": "[[2012 Tour, New York Pt. 1]]",
+      "next": "[[2012 Tour, Washington, D.C.]]"
+    },
+    {
+      "title": "2012 Tour, Philadelphia",
+      "pageid": 3765,
+      "name": "2012 Tour, Philadelphia",
+      "number": "from the road",
+      "Releasedate": "August 9, 2012",
+      "Host": "[[Scott Aukerman]]",
+      "Guests": "[[Tim Heidecker]]<br>\n[[Paul F. Tompkins]]<br>\n[[James Adomian]]",
+      "Characters": "[[Garry Marshall]]<br>\n[[Gary Busey]]<br>\n[[Nick Nolte]]",
+      "previous": "[[2012 Tour, Washington, D.C.]]",
+      "next": "[[2012 Tour, Vancouver]]"
+    },
+    {
+      "title": "2012 Tour, Portland",
+      "pageid": 3687,
+      "name": "2012 Tour, Portland",
+      "number": "from the road",
+      "Releasedate": "August 2, 2012",
+      "Host": "[[Scott Aukerman]]",
+      "Guests": "[[Paul F. Tompkins]]<br>[[James Adomian]]",
+      "Characters": "[[Lord Andrew Lloyd Webber]]<br>[[Christopher Hitchens]]",
+      "previous": "[[2012 Tour, Seattle]]",
+      "next": "[[2012 Tour, San Francisco]]"
+    },
+    {
+      "title": "2012 Tour, San Diego",
+      "pageid": 3663,
+      "name": "2012 Tour, San Diego",
+      "number": "from the road",
+      "Releasedate": "July 15, 2012",
+      "Host": "[[Scott Aukerman]]",
+      "Guests": "[[Brett Gelman]]<br>[[Jon Daly]]",
+      "Characters": "[[John Daly]]<br>[[Blind Samuel]]",
+      "previous": "none",
+      "next": "[[2012 Tour, Minneapolis]]"
+    },
+    {
+      "title": "2012 Tour, San Francisco",
+      "pageid": 3688,
+      "name": "2012 Tour, San Francisco",
+      "number": "from the road",
+      "Releasedate": "August 3, 2012",
+      "Host": "[[Scott Aukerman]]",
+      "Guests": "[[Kurt Braunohler]]<br>[[Paul F. Tompkins]]<br>[[James Adomian]]",
+      "Characters": "[[Cake Boss]]<br>[[Huell Howser]]",
+      "previous": "[[2012 Tour, Portland]]",
+      "next": "[[2012 Tour, Los Angeles]]"
+    },
+    {
+      "title": "2012 Tour, Seattle",
+      "pageid": 3686,
+      "name": "2012 Tour, Seattle",
+      "number": "from the road",
+      "Releasedate": "August 1, 2012",
+      "Host": "[[Scott Aukerman]]",
+      "Guests": "[[Paul F. Tompkins]]<br>[[James Adomian]]",
+      "Characters": "[[Werner Herzog]]<br>[[Dov Charney]]",
+      "previous": "[[2012 Tour, Chicago Pt. 2]]",
+      "next": "[[2012 Tour, Portland]]"
+    }
+  ],
+  "guests": [
+    {
+      "title": "Michael Ableson",
+      "pageid": 5286,
+      "name": "Michael Ableson",
+      "image": "ableson.jpg",
+      "Number of Appearances": "1",
+      "First Episode": "[[Be My Guest, Literally!]]"
+    },
+    {
+      "title": "James Acaster",
+      "pageid": 8920,
+      "name": "James Acaster",
+      "image": "Acaster.jpg",
+      "Number of Appearances": "1",
+      "Characters": "",
+      "First Episode": "[[Old Money]]",
+      "Latest Episode": ""
+    },
+    {
+      "title": "Demi Adejuyigbe",
+      "pageid": 7747,
+      "name": "Demi Adejuyigbe",
+      "image": "Adejuyigbe.jpg",
+      "Number of Appearances": "2",
+      "First Episode": "[[Mother's Olive Oil]]",
+      "Latest Episode": "[[Pimp My Site]]"
+    },
+    {
+      "title": "James Adomian",
+      "pageid": 2071,
+      "name": "James Adomian",
+      "image": "Handsome_adomian.jpg",
+      "Number of Appearances": "74",
+      "Characters": "[[Jesse Ventura]]<br>\n[[Christopher Hitchens]]<br>\n[[Pat Buchanan]]<br>\n[[Gary Busey]]<br>\n[[Huell Howser]]<br>\n[[Merrill Shindler]]<br>\n[[Paul Giamatti]]<br>\n[[Philip Seymour Hoffman]]<br>\n[[Gordon Ramsay]]<br>\n[[The Sheriff of Nottingham|Alan Rickman]]<br>\n[[Orson Welles' Ghost]]<br>\n[[Dov Charney]]<br>\n[[Dr. Bronner]]<br>\n[[Tom Leykis]]<br>\n[[George Zimmer]]<br>\n[[Russell Crowe]]<br>\n[[Maximilian Blanc]]<br>\n[[The Sheriff of Nottingham]]<br>\n[[George W. Bush]]<br>\n[[Slavoj Zizek]]<br>\n[[Bernie Sanders]]<br>\n[[Falkor]]<br>\n[[Chris Matthews]]<br>\n[[Winston Churchill]]<br>\n[[Sebastian Gorka]]<br>\n[[Elon Musk]]",
+      "First Episode": "[[No Such Thing as Shirter!]]",
+      "Latest Episode": "[[Live from SXSW 2025]]"
+    },
+    {
+      "title": "Ronnie Adrian",
+      "pageid": 6261
+    },
+    {
+      "title": "Mano Agapion",
+      "pageid": 7339
+    },
+    {
+      "title": "Steve Agee",
+      "pageid": 2468,
+      "name": "Steve Agee",
+      "image": "Agee.jpg",
+      "Number of Appearances": "2",
+      "First Episode": "[[Four Douche Episode]]",
+      "Latest Episode": "[[Burning Love]]"
+    },
+    {
+      "title": "Dan Ahdoot",
+      "pageid": 6097
+    },
+    {
+      "title": "Jason Alexander",
+      "pageid": 8547,
+      "name": "Jason Alexander",
+      "image": "Alexander.webp",
+      "Number of Appearances": "1",
+      "Characters": "",
+      "First Episode": "[[Hold for Room Tone]]",
+      "Latest Episode": ""
+    },
+    {
+      "title": "Asif Ali",
+      "pageid": 8927,
+      "name": "Asif Ali",
+      "image": "Ali.jpg",
+      "imagewidth": "200px",
+      "Number of Appearances": "2",
+      "Characters": "",
+      "First Episode": "[[Nasty Boys]]",
+      "Latest Episode": "[[Group Soup]]"
+    },
+    {
+      "title": "Leo Allen",
+      "pageid": 3252,
+      "name": "Leo Allen",
+      "image": "Allen.jpg",
+      "Number of Appearances": "1",
+      "First Episode": "[[Jing It or Ding It!]]"
+    },
+    {
+      "title": "Kevin Allison",
+      "pageid": 4898,
+      "name": "Kevin Allison",
+      "image": "allison.jpeg",
+      "Number of Appearances": "1",
+      "First Episode": "[[Little Button Puss]]"
+    },
+    {
+      "title": "Stephanie Allynne",
+      "pageid": 5015
+    },
+    {
+      "title": "Brian Jordan Alvarez",
+      "pageid": 8096
+    },
+    {
+      "title": "American Football",
+      "pageid": 5128,
+      "name": "American Football",
+      "image": "american_football.jpg",
+      "Number of Appearances": "2",
+      "First Episode": "[[Beatle Heaven]]",
+      "Latest Episode": "[[Two Fingers Wide]]"
+    },
+    {
+      "title": "Caroline Anderson",
+      "pageid": 3844
+    },
+    {
+      "title": "Eva Anderson",
+      "pageid": 3847,
+      "name": "Eva Anderson",
+      "image": "Eva Anderson.png",
+      "Number of Appearances": "1",
+      "Characters": "[[Hauntettes]]",
+      "First Episode": "[[The Creeeeeeepy Halloween Special]]"
+    },
+    {
+      "title": "Eric Andr\u00e9",
+      "pageid": 3747,
+      "name": "Eric Andr\u00e9",
+      "image": "andre.jpg",
+      "Number of Appearances": "1",
+      "First Episode": "[[Todd's Life 2.0]]"
+    },
+    {
+      "title": "Alex Anfanger",
+      "pageid": 4744,
+      "name": "Alex Anfanger",
+      "image": "Anfanger.jpg",
+      "Number of Appearances": "1",
+      "First Episode": "[[I Turned It on for the Dog Penis]]"
+    },
+    {
+      "title": "Lucia Aniello",
+      "pageid": 7047
+    }
+  ],
+  "characters": [
+    {
+      "title": "'China'",
+      "pageid": 6796,
+      "name": "China",
+      "Number of Appearances": "2",
+      "Played by": "[[Thomas Middleditch]]",
+      "First Episode": "[[A Silicon Valley P-Cast]]",
+      "Latest Episode": "[[Silicone Bralley Poo Crew]]"
+    },
+    {
+      "title": "Ahmad",
+      "pageid": 5615,
+      "name": "Ahmad",
+      "Number of Appearances": "1",
+      "Played by": "[[Paul Brittain]]",
+      "First Episode": "[[Snow Dome]]",
+      "Latest Episode": ""
+    },
+    {
+      "title": "Alan Buchanan",
+      "pageid": 7178,
+      "name": "Alan Buchanan",
+      "Number of Appearances": "1",
+      "Played by": "[[Thomas Middleditch]]",
+      "First Episode": "[[Tight Tort]]",
+      "Latest Episode": ""
+    },
+    {
+      "title": "Brantley Aldean",
+      "pageid": 7841,
+      "name": "Brantley Aldean",
+      "Number of Appearances": "4",
+      "Played by": "[[Drew Tarver]]",
+      "First Episode": "[[Memphis Kansas Breeze with YACHT]]",
+      "Latest Episode": "[[2022 Tour, Vancouver]]"
+    },
+    {
+      "title": "Alister Brown",
+      "pageid": 8119,
+      "name": "Alister Brown",
+      "Number of Appearances": "1",
+      "Played by": "[[Neil Campbell]]",
+      "First Episode": "[[Rather Good]]"
+    },
+    {
+      "title": "Woody Allen",
+      "pageid": 6422,
+      "name": "Woody Allen",
+      "Number of Appearances": "1",
+      "Played by": "[[Anthony Atamanuik]]",
+      "First Episode": "[[The WoodyVerse]]",
+      "Latest Episode": "",
+      "imagewidth": "200px"
+    },
+    {
+      "title": "Alli",
+      "pageid": 4845
+    },
+    {
+      "title": "Ben Alterman",
+      "pageid": 2903
+    },
+    {
+      "title": "Howard Amethyst",
+      "pageid": 4862,
+      "name": "Howard Amethyst",
+      "Number of Appearances": "1",
+      "Played by": "[[Eddie Pepitone]]",
+      "First Episode": "[[Milkshake Movies]]",
+      "Latest Episode": "-"
+    },
+    {
+      "title": "Ms. Anderson",
+      "pageid": 6123,
+      "name": "Ms. Anderson",
+      "Number of Appearances": "1",
+      "Played by": "[[Seth Morris]]",
+      "First Episode": "[[The Holiday Womptacular]]"
+    },
+    {
+      "title": "Maya Angelou",
+      "pageid": 2904
+    },
+    {
+      "title": "Appetizer PeeE Neur",
+      "pageid": 7656,
+      "name": "Appetizer PeeE Neur",
+      "Number of Appearances": "1",
+      "Played by": "[[Carl Tart]]",
+      "First Episode": "[[The PeeE Neurs]]",
+      "Latest Episode": ""
+    },
+    {
+      "title": "Miles Archer",
+      "pageid": 2522
+    },
+    {
+      "title": "Kevin Attenborough",
+      "pageid": 8519,
+      "name": "Kevin Attenborough",
+      "Number of Appearances": "2",
+      "Played by": "[[Paul F. Tompkins]]",
+      "First Episode": "[[Phoebing for Some Phoebes]]",
+      "Latest Episode": "[[2022 Tour, Providence]]"
+    },
+    {
+      "title": "Tony B.",
+      "pageid": 6152,
+      "name": "Tony B.",
+      "Number of Appearances": "1",
+      "Played by": "[[Tim Kalpakis]]",
+      "First Episode": "[[The Phony Marony Show with The Thermals]]",
+      "Latest Episode": ""
+    },
+    {
+      "title": "B.Q.",
+      "pageid": 6594,
+      "name": "B.Q.",
+      "Number of Appearances": "7",
+      "Played by": "[[Zeke Nicholson]]",
+      "First Episode": "[[Man Veils]]",
+      "Latest Episode": "[[Podcast Rescue]]"
+    },
+    {
+      "title": "The Bachelor Brothers",
+      "pageid": 4035
+    },
+    {
+      "title": "Bad Daddy Vlad",
+      "pageid": 5826
+    },
+    {
+      "title": "Bane",
+      "pageid": 8601,
+      "name": "Bane",
+      "image": "",
+      "imagewidth": "200px",
+      "Number of Appearances": "2",
+      "Played by": "[[Gil Ozeri]]",
+      "First Episode": "[[Midnight Junket]]",
+      "Latest Episode": "[[Oh, Hell Maybe!]]"
+    },
+    {
+      "title": "Banksy",
+      "pageid": 3785
+    }
+  ]
+}
