@@ -332,7 +332,7 @@ function App() {
     }
     hoverTimeoutRef.current = setTimeout(() => {
       setHoveredEpisode(idx);
-    }, 30); // Small delay to batch rapid hover changes
+    }, 50); // Small delay to batch rapid hover changes
   }, []);
 
   // ------------------------------------------------------------------------
@@ -587,6 +587,18 @@ function App() {
           );
         })}
 
+        {/* Zoom slider */}
+        <div className="flex items-center gap-4 mt-3 pt-3 border-t">
+          <span className="text-xs text-gray-500">Zoom:</span>
+          <input
+            type="range"
+            min="6"
+            max="16"
+            value={cellSize}
+            onChange={(e) => setCellSize(Number(e.target.value))}
+            className="w-24 accent-blue-500"
+          />
+        </div>
       </div>
     );
   };
@@ -1016,7 +1028,7 @@ function App() {
    */
   return (
     <div className="min-h-screen bg-gray-50 p-3" onClick={handleBackgroundClick}>
-      <div className="w-full">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-4">
           <h1 className="text-xl font-bold text-gray-900">Comedy Bang Bang Universe</h1>
@@ -1025,10 +1037,10 @@ function App() {
           </p>
         </div>
 
-        {/* Main flex layout - timeline expands, sidebar fixed width */}
-        <div className="flex gap-4">
-          {/* Timeline panel - expands to fill available space */}
-          <div className="flex-1 bg-white rounded-xl p-4 shadow-sm min-w-0">
+        {/* Main grid layout */}
+        <div className="grid lg:grid-cols-3 gap-4">
+          {/* Timeline panel (2/3 width on large screens) */}
+          <div className="lg:col-span-2 bg-white rounded-xl p-4 shadow-sm overflow-x-auto">
             <div className="mb-3 flex items-start justify-between">
               <div>
                 <h2 className="font-semibold text-gray-800 text-sm">Episode Timeline</h2>
@@ -1051,8 +1063,8 @@ function App() {
             <EpisodeSummary />
           </div>
 
-          {/* Right sidebar - fixed width */}
-          <div className="w-72 shrink-0 space-y-3">
+          {/* Right sidebar */}
+          <div className="space-y-3">
             {/* Entity browser */}
             <div className="bg-white rounded-xl p-3 shadow-sm">
               {/* Guest/Character toggle */}
