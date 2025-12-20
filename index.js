@@ -258,6 +258,19 @@ const loadData = (raw) => {
     char.imageUrl = characterImages[name] || null;
   });
 
+  // Calculate max episodes per year (with and without live episodes)
+  // Do this once at load time instead of recalculating on every render
+  const stats = {
+    maxEpisodesWithLive: 0,
+    maxEpisodesWithoutLive: 0
+  };
+
+  episodesByYear.forEach((yearEps) => {
+    stats.maxEpisodesWithLive = Math.max(stats.maxEpisodesWithLive, yearEps.length);
+    const withoutLive = yearEps.filter(ep => !isLiveEpisode(ep)).length;
+    stats.maxEpisodesWithoutLive = Math.max(stats.maxEpisodesWithoutLive, withoutLive);
+  });
+
   return {
     episodes,
     guestMap,
@@ -266,7 +279,8 @@ const loadData = (raw) => {
     guestImages,
     characterImages,
     episodesByYear,
-    years
+    years,
+    stats
   };
 };
 
@@ -311,14 +325,76 @@ function App() {
   // How to sort the entity list: 'appearances', 'first', 'last', or 'name'
   const [sortBy, setSortBy] = useState('appearances');
 
+  // Timeline container ref for measuring width
+  const timelineContainerRef = React.useRef(null);
+
   // Size of each cell in the timeline grid (in pixels)
   const [cellSize, setCellSize] = useState(11);
 
+  // Whether to include live episodes in the timeline
+  const [includeLiveEps, setIncludeLiveEps] = useState(false);
+
+  // Simple: just pick the pre-calculated max based on checkbox state
+  const maxEpisodesInYear = includeLiveEps
+    ? data?.stats?.maxEpisodesWithLive || 0
+    : data?.stats?.maxEpisodesWithoutLive || 0;
+
+  // Debug: Check if checkbox state is changing
+  console.log('includeLiveEps:', includeLiveEps);
+  console.log('maxEpisodesInYear:', maxEpisodesInYear);
+  console.log('stats:', data?.stats);
+
+  // Auto-size cells to fill container width
+  useEffect(() => {
+    console.log("use effect running");
+    const container = timelineContainerRef.current;
+    if (!container || !maxEpisodesInYear) return;
+
+    const updateCellSize = () => {
+      const containerWidth = container.clientWidth;
+
+      // Guard: Don't update if container isn't rendered yet
+      if (containerWidth === 0) {
+        console.log('containerWidth is 0, skipping update');
+        return;
+      }
+
+      const yearLabelWidth = 40;    // w-12 (48px) + ~2px spacing
+      const countLabelWidth = 30;   // w-14 (56px) + ~2px spacing
+      const gap = 1;                // Fixed gap between cells
+
+      const availableWidth = containerWidth - yearLabelWidth - countLabelWidth;
+
+      // Calculate cell size with decimal precision (no rounding!)
+      const size = (availableWidth - (maxEpisodesInYear - 1) * gap) / maxEpisodesInYear;
+
+      // Debug: Show calculation details
+      console.log('containerWidth:', containerWidth);
+      console.log('maxEpisodesInYear:', maxEpisodesInYear);
+      console.log('availableWidth:', availableWidth);
+      console.log('calculated size:', size);
+      console.log('total used:', (size * maxEpisodesInYear) + ((maxEpisodesInYear - 1) * gap));
+
+      // Only update if size is valid (minimum 4px)
+      if (size >= 4) {
+        setCellSize(size);
+        console.log("set cell size to", size);
+      } else {
+        console.log('calculated size too small, keeping current cellSize');
+      }
+    };
+
+    // Call immediately when maxEpisodes changes
+    updateCellSize();
+
+    const resizeObserver = new ResizeObserver(updateCellSize);
+    resizeObserver.observe(container);
+
+    return () => resizeObserver.disconnect();
+  }, [includeLiveEps, maxEpisodesInYear]); // Re-run when checkbox toggles or max changes
+
   // Search query for filtering entities
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Filter for live/tour episodes
-  const [includeLiveEps, setIncludeLiveEps] = useState(false);
 
   // Entity being hovered (for live episode highlighting)
   // Format: { name: string, type: 'guest' | 'character' } or null
@@ -492,10 +568,8 @@ function App() {
    * In a larger app, you might move this to a separate file and pass props.
    */
   const Timeline = () => {
-    const gap = 1;        // Gap between cells in pixels
-
     return (
-      <div className="space-y-0.5">
+      <div ref={timelineContainerRef} className="space-y-0.5">
         {/* One row per year */}
         {years.map(year => {
           const yearEps = episodesByYear.get(year) || [];
@@ -518,7 +592,7 @@ function App() {
               {/* Episode cells - one per episode, sequential */}
               <div
                 className="flex"
-                style={{ gap }}
+                style={{ gap: 1 }}
                 onMouseLeave={() => {
                   // Clear any pending debounced hover and immediately clear state
                   if (hoverTimeoutRef.current) {
@@ -587,18 +661,6 @@ function App() {
           );
         })}
 
-        {/* Zoom slider */}
-        <div className="flex items-center gap-4 mt-3 pt-3 border-t">
-          <span className="text-xs text-gray-500">Zoom:</span>
-          <input
-            type="range"
-            min="6"
-            max="16"
-            value={cellSize}
-            onChange={(e) => setCellSize(Number(e.target.value))}
-            className="w-24 accent-blue-500"
-          />
-        </div>
       </div>
     );
   };
@@ -1040,7 +1102,7 @@ function App() {
         {/* Main grid layout */}
         <div className="grid lg:grid-cols-3 gap-4">
           {/* Timeline panel (2/3 width on large screens) */}
-          <div className="lg:col-span-2 bg-white rounded-xl p-4 shadow-sm overflow-x-auto">
+          <div className="lg:col-span-2 bg-white rounded-xl p-4 shadow-sm">
             <div className="mb-3 flex items-start justify-between">
               <div>
                 <h2 className="font-semibold text-gray-800 text-sm">Episode Timeline</h2>
