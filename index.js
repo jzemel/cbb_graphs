@@ -17,9 +17,19 @@ const { useState, useMemo, useCallback, useEffect } = React;
 // ==========================================================================
 // CONSTANTS
 // ==========================================================================
-// Color for entity hover highlighting (on episode cells)
-// Change this value to adjust the hover highlight color
-const ENTITY_HOVER_COLOR = '#FBBF24';
+
+// Episode cell colors
+const EPISODE_DEFAULT_COLOR = 'hsl(210, 50%, 60%)';     // Blue for regular episodes
+const EPISODE_LIVE_COLOR = '#EE6C4D';                   // Coral/orange for live episodes
+const EPISODE_HIGHLIGHT_COLOR = 'hsl(45, 100%, 51%)';  // Bright amber for selected entity
+const EPISODE_HOVER_COLOR = '#004777';                  // Dark blue for hover fill
+const ENTITY_HOVER_COLOR = 'hsl(45, 100%, 51%)';       // Bright amber for entity hover
+
+// Episode cell outline/stroke
+const HOVER_OUTLINE_WIDTH = '3px';                      // Outline width when hovering
+const HOVER_OUTLINE_COLOR = 'hsl(45, 100%, 51%)';      // Bright amber for hover outline
+const PINNED_OUTLINE_WIDTH = '3px';                     // Outline width when pinned
+const PINNED_OUTLINE_COLOR = 'hsl(38, 92%, 50%)';      // Darker amber for pinned outline
 
 
 // ==========================================================================
@@ -514,31 +524,29 @@ function App() {
                     (hoveredEntity.type === 'character' && ep.characters.includes(hoveredEntity.name))
                   );
 
-                  // Determine cell color based on state
-                  let bgColor;
+                  // Determine cell color class based on state (pure CSS for performance)
+                  let bgColorClass;
                   if (hasHoveredEntity) {
-                    // Use special hover color for episodes with hovered entity
-                    bgColor = ENTITY_HOVER_COLOR;
+                    bgColorClass = 'bg-[hsl(45,100%,51%)]'; // ENTITY_HOVER_COLOR
                   } else if (hasHighlight) {
-                    // Amber for episodes with selected entity
-                    bgColor = 'hsl(38, 85%, 40%)';
+                    bgColorClass = 'bg-[hsl(45,100%,51%)]'; // EPISODE_HIGHLIGHT_COLOR
+                  } else if (isLiveEpisode(ep)) {
+                    bgColorClass = 'bg-[#EE6C4D]'; // EPISODE_LIVE_COLOR
                   } else {
-                    // Blue for regular episodes
-                    bgColor = 'hsl(210, 50%, 60%)';
+                    bgColorClass = 'bg-[hsl(210,50%,60%)]'; // EPISODE_DEFAULT_COLOR
                   }
 
-                  // Outline styling: CSS hover for instant feedback, state-based for pinned
-                  // Using outline instead of ring (box-shadow) for faster rendering
-                  const ringClass = isPinned
-                    ? 'outline outline-2 outline-amber-600 z-10'
-                    : 'hover:outline hover:outline-2 hover:outline-amber-400 hover:z-10';
+                  // Pinned outline and fill class
+                  const pinnedClass = isPinned
+                    ? 'z-10 bg-[hsl(38,92%,50%)] outline outline-[3px] outline-[hsl(38,92%,50%)]'
+                    : 'hover:bg-[#004777] hover:outline hover:outline-[3px] hover:outline-[hsl(45,100%,51%)] hover:z-10';
 
                   return (
                     <div
                       key={ep.idx}
                       data-timeline-cell
-                      className={`rounded-sm cursor-pointer ${ringClass}`}
-                      style={{ width: cellSize, height: cellSize, backgroundColor: bgColor }}
+                      className={`rounded-sm cursor-pointer ${bgColorClass} ${pinnedClass}`}
+                      style={{ width: cellSize, height: cellSize }}
                       onMouseEnter={() => setHoveredEpisodeDebounced(ep.idx)}
                       onClick={() => {
                         // Toggle pin: if already pinned to this episode, unpin; otherwise pin
@@ -1024,7 +1032,15 @@ function App() {
                   onChange={(e) => setIncludeLiveEps(e.target.checked)}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
-                Include live eps
+                <span className="flex items-center gap-1">
+                  Include live eps
+                  {includeLiveEps && (
+                    <span
+                      className="inline-block w-2.5 h-2.5 rounded-sm"
+                      style={{ backgroundColor: EPISODE_LIVE_COLOR }}
+                    />
+                  )}
+                </span>
               </label>
             </div>
             <Timeline />
