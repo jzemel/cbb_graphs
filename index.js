@@ -340,6 +340,7 @@ function App() {
     : data?.stats?.maxEpisodesWithoutLive || 0;
 
   // Debug: Check if checkbox state is changing
+  console.log('=== State Update ===');
   console.log('includeLiveEps:', includeLiveEps);
   console.log('maxEpisodesInYear:', maxEpisodesInYear);
   console.log('stats:', data?.stats);
@@ -359,27 +360,30 @@ function App() {
         return;
       }
 
+      const padding = 32;           // p-4 = 16px on each side
       const yearLabelWidth = 40;    // w-12 (48px) + ~2px spacing
       const countLabelWidth = 30;   // w-14 (56px) + ~2px spacing
       const gap = 1;                // Fixed gap between cells
 
-      const availableWidth = containerWidth - yearLabelWidth - countLabelWidth;
+      const availableWidth = containerWidth - padding - yearLabelWidth - countLabelWidth;
 
       // Calculate cell size with decimal precision (no rounding!)
       const size = (availableWidth - (maxEpisodesInYear - 1) * gap) / maxEpisodesInYear;
 
       // Debug: Show calculation details
+      console.log('=== Cell Size Calculation ===');
       console.log('containerWidth:', containerWidth);
       console.log('maxEpisodesInYear:', maxEpisodesInYear);
       console.log('availableWidth:', availableWidth);
       console.log('calculated size:', size);
       console.log('total used:', (size * maxEpisodesInYear) + ((maxEpisodesInYear - 1) * gap));
+      console.log('size change:', size > cellSize ? 'LARGER' : size < cellSize ? 'smaller' : 'same');
 
-      // Only update if size is valid (minimum 4px)
-      if (size >= 4) {
+      // Only update if size is valid (minimum 4px) and different from current
+      if (size >= 4 && Math.abs(size - cellSize) > 0.1) {
         setCellSize(size);
         console.log("set cell size to", size);
-      } else {
+      } else if (size < 4) {
         console.log('calculated size too small, keeping current cellSize');
       }
     };
@@ -569,7 +573,7 @@ function App() {
    */
   const Timeline = () => {
     return (
-      <div ref={timelineContainerRef} className="space-y-0.5">
+      <div className="space-y-0.5">
         {/* One row per year */}
         {years.map(year => {
           const yearEps = episodesByYear.get(year) || [];
@@ -828,10 +832,13 @@ function App() {
    * - Name
    * - Frequency bar
    * - Appearance count
+   *
+   * Wrapped in React.memo to prevent re-renders when hoveredEntity changes,
+   * which would reset the scroll position.
    */
-  const EntityList = () => (
+  const EntityList = React.memo(() => (
     <div
-      className="space-y-0.5 max-h-64 overflow-y-auto scrollbar-thin pr-1"
+      className="space-y-0.5 max-h-[40vh] overflow-y-auto scrollbar-thin pr-1"
       onMouseLeave={() => setHoveredEntity(null)}
     >
       {/* Limit to 100 items for performance */}
@@ -880,7 +887,7 @@ function App() {
         );
       })}
     </div>
-  );
+  ));
 
 
   // ========================================================================
@@ -1090,7 +1097,7 @@ function App() {
    */
   return (
     <div className="min-h-screen bg-gray-50 p-3" onClick={handleBackgroundClick}>
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-screen-2xl mx-auto">
         {/* Header */}
         <div className="mb-4">
           <h1 className="text-xl font-bold text-gray-900">Comedy Bang Bang Universe</h1>
@@ -1099,10 +1106,10 @@ function App() {
           </p>
         </div>
 
-        {/* Main grid layout */}
-        <div className="grid lg:grid-cols-3 gap-4">
-          {/* Timeline panel (2/3 width on large screens) */}
-          <div className="lg:col-span-2 bg-white rounded-xl p-4 shadow-sm">
+        {/* Main flex layout */}
+        <div className="flex gap-4">
+          {/* Timeline panel - expands to fill space */}
+          <div ref={timelineContainerRef} className="flex-1 min-w-[600px] bg-white rounded-xl p-4 shadow-sm">
             <div className="mb-3 flex items-start justify-between">
               <div>
                 <h2 className="font-semibold text-gray-800 text-sm">Episode Timeline</h2>
@@ -1125,10 +1132,10 @@ function App() {
             <EpisodeSummary />
           </div>
 
-          {/* Right sidebar */}
-          <div className="space-y-3">
+          {/* Right sidebar - fixed width */}
+          <div className="w-80 shrink-0 flex flex-col gap-3 max-h-[calc(100vh-120px)]">
             {/* Entity browser */}
-            <div className="bg-white rounded-xl p-3 shadow-sm">
+            <div className="bg-white rounded-xl p-3 shadow-sm flex-shrink-0">
               {/* Guest/Character toggle */}
               <div className="flex gap-1 mb-2">
                 {['guest', 'character'].map(t => (
@@ -1185,7 +1192,7 @@ function App() {
             </div>
 
             {/* Detail panel */}
-            <div className="bg-white rounded-xl p-3 shadow-sm">
+            <div className="bg-white rounded-xl p-3 shadow-sm flex-1 overflow-y-auto min-h-0">
               <EntityDetail />
             </div>
           </div>
