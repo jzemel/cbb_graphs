@@ -276,9 +276,8 @@ function App() {
   // useState creates a piece of state and a function to update it.
   // When state changes, React automatically re-renders the component.
 
-  // The raw data from cbb_data.js (or null if loading)
-  const [rawData, setRawData] = useState(CBB_DATA);
-  const [loading, setLoading] = useState(!CBB_DATA);
+  // The raw data from cbb_data.js
+  const [rawData] = useState(CBB_DATA);
 
   // Process the raw data using useMemo (only recomputes when rawData changes)
   const data = useMemo(() => loadData(rawData), [rawData]);
@@ -389,87 +388,13 @@ function App() {
     }, 50); // Small delay to batch rapid hover changes
   }, []);
 
-  // ------------------------------------------------------------------------
-  // FILE UPLOAD HANDLER
-  // ------------------------------------------------------------------------
-  /**
-   * Handles uploading a custom JSON data file.
-   * Supports both processed format and raw wiki format.
-   */
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      try {
-        const json = JSON.parse(evt.target.result);
-        // Check if it's already in processed format (has abbreviated keys)
-        if (json.episodes && json.episodes[0]?.t) {
-          setRawData(json);
-        } else if (json.episodes && json.episodes[0]?.title) {
-          // Convert from raw wiki format to processed format
-          const processed = {
-            episodes: json.episodes
-              .filter(e => e.Releasedate)
-              .map(e => ({
-                t: e.title || '',
-                n: e.number || '',
-                d: new Date(e.Releasedate).toISOString().split('T')[0],
-                g: (e.Guests || '').split(/<br\s*\/?>\s*|\n/).map(s => {
-                  const m = s.match(/\[\[([^\]|]+)/);
-                  return m ? m[1].trim() : null;
-                }).filter(Boolean),
-                c: (e.Characters || '').split(/<br\s*\/?>\s*|\n/).map(s => {
-                  const m = s.match(/\[\[([^\]|]+)/);
-                  return m ? m[1].trim() : null;
-                }).filter(Boolean)
-              })),
-            guestCharacters: {}
-          };
-          // Build guest->character mapping from character data
-          if (json.characters) {
-            json.characters.forEach(char => {
-              const playedBy = (char['Played by'] || '').match(/\[\[([^\]|]+)/);
-              if (playedBy && char.name) {
-                const guest = playedBy[1].trim();
-                if (!processed.guestCharacters[guest]) processed.guestCharacters[guest] = [];
-                if (!processed.guestCharacters[guest].includes(char.name)) {
-                  processed.guestCharacters[guest].push(char.name);
-                }
-              }
-            });
-          }
-          setRawData(processed);
-        }
-        setLoading(false);
-      } catch (err) {
-        alert('Error parsing JSON: ' + err.message);
-      }
-    };
-    reader.readAsText(file);
-  };
-
-  // ------------------------------------------------------------------------
-  // LOADING STATE
-  // ------------------------------------------------------------------------
-  // Show a file upload UI if no data is loaded
-  if (loading || !data) {
+  // Check if data is available
+  if (!data) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="bg-white p-8 rounded-xl shadow-lg text-center max-w-md">
           <h1 className="text-2xl font-bold mb-4">Comedy Bang Bang Universe</h1>
-          <p className="text-gray-600 mb-6">Upload your CBB data JSON file to explore the universe!</p>
-          <label className="block">
-            <span className="sr-only">Choose file</span>
-            <input
-              type="file"
-              accept=".json"
-              onChange={handleFileUpload}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
-            />
-          </label>
-          <p className="text-xs text-gray-400 mt-4">Supports both raw wiki format and processed format</p>
+          <p className="text-gray-600">Error loading data. Make sure cbb_data.js is included.</p>
         </div>
       </div>
     );
