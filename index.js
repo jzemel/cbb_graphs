@@ -4,31 +4,6 @@
  *
  * An interactive visualization for exploring 17 years of Comedy Bang Bang podcast data.
  *
- * REACT CONCEPTS USED IN THIS FILE:
- *
- * 1. COMPONENTS: Reusable pieces of UI (like Timeline, EntityList, etc.)
- *    - Components are functions that return JSX
- *    - They can accept "props" (properties) as input
- *    - Example: function MyComponent(props) { return <div>{props.name}</div>; }
- *
- * 2. STATE (useState): Data that changes over time and triggers re-renders
- *    - const [value, setValue] = useState(initialValue);
- *    - When you call setValue(), React re-renders the component
- *    - Example: const [count, setCount] = useState(0);
- *
- * 3. MEMOIZATION (useMemo): Cache expensive calculations
- *    - Only recalculates when dependencies change
- *    - Prevents unnecessary work on every render
- *    - Example: const sorted = useMemo(() => expensiveSort(data), [data]);
- *
- * 4. CALLBACKS (useCallback): Cache function references
- *    - Useful when passing functions to child components
- *    - Prevents unnecessary re-renders of children
- *
- * 5. JSX: HTML-like syntax that compiles to React.createElement() calls
- *    - Use className instead of class (class is reserved in JS)
- *    - Use {expression} to embed JavaScript in JSX
- *    - Example: <div className="text-red">{user.name}</div>
  */
 
 // ==========================================================================
@@ -292,7 +267,6 @@ const loadData = (raw) => {
 /**
  * The root component that contains all the application state and UI.
  *
- * In React, the App component is typically the top-level component.
  * It holds the main state and renders child components.
  */
 function App() {
