@@ -47,10 +47,13 @@ const PINNED_OUTLINE_COLOR = 'hsl(38, 92%, 50%)';      // Darker amber for pinne
  *
  * The hue goes from 280 (purple) to 120 (green):
  * - Purple = appeared long ago
+ * - Blue = median recency
  * - Green = appeared recently
  */
 const getRecencyColor = (ratio) => {
-  const hue = 280 - ratio * 160;  // 280 = purple, 120 = green
+  // Apply power curve to spread out recent appearances
+  const adjusted = Math.pow(ratio, 4);
+  const hue = 280 - adjusted * 160;  // 280 = purple, 120 = green
   return `hsl(${hue}, 70%, 50%)`;
 };
 
@@ -105,6 +108,25 @@ const isLiveEpisode = (episode) => {
   const hasLiveInTitle = /\blive\b/i.test(title);
 
   return hasNonNumericNumber || hasLiveInTitle;
+};
+
+/**
+ * Get the base color for an episode cell based on the number of guests.
+ * Uses a blue color scale where intensity increases with more guests.
+ *
+ * @param {number} guestCount - Number of guests in the episode
+ * @param {number} maxGuests - Maximum guests across all episodes
+ * @returns {string} CSS HSL color string
+ */
+const getEpisodeBaseColor = (guestCount, maxGuests) => {
+  if (maxGuests === 0) return 'hsl(210, 50%, 60%)';
+
+  // Map guest count to lightness: fewer guests = lighter, more guests = darker
+  // Range: 85% (lightest) to 45% (darkest)
+  const ratio = guestCount / maxGuests;
+  const lightness = 85 - (ratio * 40);
+
+  return `hsl(210, 50%, ${lightness}%)`;
 };
 
 
@@ -243,17 +265,29 @@ const loadData = (raw) => {
     char.imageUrl = characterImages[name] || null;
   });
 
-  // Calculate max episodes per year (with and without live episodes)
+  // Calculate max values for color scaling
   // Do this once at load time instead of recalculating on every render
   const stats = {
     maxEpisodesWithLive: 0,
-    maxEpisodesWithoutLive: 0
+    maxEpisodesWithoutLive: 0,
+    maxGuests: 0,
+    maxCharacters: 0,
+    maxCharactersPerGuest: 0
   };
 
   episodesByYear.forEach((yearEps) => {
     stats.maxEpisodesWithLive = Math.max(stats.maxEpisodesWithLive, yearEps.length);
     const withoutLive = yearEps.filter(ep => !isLiveEpisode(ep)).length;
     stats.maxEpisodesWithoutLive = Math.max(stats.maxEpisodesWithoutLive, withoutLive);
+  });
+
+  // Calculate max guests, characters, and characters per guest across all episodes
+  episodes.forEach(ep => {
+    stats.maxGuests = Math.max(stats.maxGuests, ep.num_guests);
+    stats.maxCharacters = Math.max(stats.maxCharacters, ep.num_characters);
+    if (ep.num_guests > 0) {
+      stats.maxCharactersPerGuest = Math.max(stats.maxCharactersPerGuest, ep.characters_per_guest);
+    }
   });
 
   return {
@@ -316,6 +350,9 @@ function App() {
 
   // Whether to include live episodes in the timeline
   const [includeLiveEps, setIncludeLiveEps] = useState(false);
+
+  // Color mode for episode cells: 'guests', 'characters', or 'chars-per-guest'
+  const [colorMode, setColorMode] = useState('guests');
 
   // Simple: just pick the pre-calculated max based on checkbox state
   const maxEpisodesInYear = includeLiveEps
@@ -397,6 +434,7 @@ function App() {
       setHoveredEpisode(idx);
     }, 50); // Small delay to batch rapid hover changes
   }, []);
+
 
   // Check if data is available
   if (!data) {
@@ -524,29 +562,48 @@ function App() {
                     (hoveredEntity.type === 'character' && ep.characters.includes(hoveredEntity.name))
                   );
 
-                  // Determine cell color class based on state (pure CSS for performance)
-                  let bgColorClass;
+                  // Determine cell background color based on state
+                  let bgColor;
                   if (hasHoveredEntity) {
-                    bgColorClass = 'bg-[hsl(45,100%,51%)]'; // ENTITY_HOVER_COLOR
+                    bgColor = ENTITY_HOVER_COLOR;
                   } else if (hasHighlight) {
-                    bgColorClass = 'bg-[hsl(45,100%,51%)]'; // EPISODE_HIGHLIGHT_COLOR
+                    bgColor = EPISODE_HIGHLIGHT_COLOR;
                   } else if (isLiveEpisode(ep)) {
-                    bgColorClass = 'bg-[#EE6C4D]'; // EPISODE_LIVE_COLOR
+                    bgColor = EPISODE_LIVE_COLOR;
                   } else {
-                    bgColorClass = 'bg-[hsl(210,50%,60%)]'; // EPISODE_DEFAULT_COLOR
+                    // Base color scaled by selected metric
+                    switch (colorMode) {
+                      case 'characters':
+                        bgColor = getEpisodeBaseColor(ep.num_characters, data.stats.maxCharacters);
+                        break;
+                      case 'chars-per-guest':
+                        bgColor = getEpisodeBaseColor(ep.characters_per_guest, data.stats.maxCharactersPerGuest);
+                        break;
+                      default: // 'guests'
+                        bgColor = getEpisodeBaseColor(ep.num_guests, data.stats.maxGuests);
+                    }
                   }
 
-                  // Pinned outline and fill class
-                  const pinnedClass = isPinned
-                    ? 'z-10 bg-[hsl(38,92%,50%)] outline outline-[3px] outline-[hsl(38,92%,50%)]'
-                    : 'hover:bg-[#004777] hover:outline hover:outline-[3px] hover:outline-[hsl(45,100%,51%)] hover:z-10';
+                  // Pinned state uses special styling
+                  const pinnedStyles = isPinned
+                    ? { backgroundColor: 'hsl(38,92%,50%)', outline: '3px solid hsl(38,92%,50%)' }
+                    : {};
 
                   return (
                     <div
                       key={ep.idx}
                       data-timeline-cell
-                      className={`rounded-sm cursor-pointer ${bgColorClass} ${pinnedClass}`}
-                      style={{ width: cellSize, height: cellSize }}
+                      className={`rounded-sm cursor-pointer ${
+                        isPinned
+                          ? 'z-10'
+                          : '[background:var(--cell-bg)] hover:bg-[#004777] hover:outline hover:outline-[3px] hover:outline-[hsl(45,100%,51%)] hover:z-10'
+                      }`}
+                      style={{
+                        '--cell-bg': bgColor,
+                        width: cellSize,
+                        height: cellSize,
+                        ...pinnedStyles
+                      }}
                       onMouseEnter={() => setHoveredEpisodeDebounced(ep.idx)}
                       onClick={() => {
                         // Toggle pin: if already pinned to this episode, unpin; otherwise pin
@@ -740,61 +797,46 @@ function App() {
    * - Frequency bar
    * - Appearance count
    *
-   * Wrapped in React.memo to prevent re-renders when hoveredEntity changes,
-   * which would reset the scroll position.
+   * Scroll container is kept outside memoized content to preserve scroll position.
    */
-  const EntityList = React.memo(() => (
-    <div
-      className="space-y-0.5 max-h-[40vh] overflow-y-auto scrollbar-thin pr-1"
-      onMouseLeave={() => setHoveredEntity(null)}
-    >
-      {/* Limit to 100 items for performance */}
-      {sortedEntities.slice(0, 100).map((entity) => {
-        const isSelected = selectedEntity === entity.name;
-
-        // Calculate recency: 0 = first episode, 1 = last episode
+  const EntityListItems = React.memo(({ entities, selected, type, onSelect, onHover }) => (
+    <>
+      {entities.map((entity) => {
+        const isSelected = selected === entity.name;
         const recencyRatio = entity.lastIdx / (episodes.length - 1);
-
-        // Calculate bar width relative to most frequent entity
-        const barWidth = (entity.episodes.length / (sortedEntities[0]?.episodes.length || 1)) * 100;
+        const barWidth = (entity.episodes.length / (entities[0]?.episodes.length || 1)) * 100;
 
         return (
           <div
             key={entity.name}
-            onClick={() => setSelectedEntity(isSelected ? null : entity.name)}
-            onMouseEnter={() => setHoveredEntity({ name: entity.name, type: entityType })}
+            onClick={() => onSelect(isSelected ? null : entity.name)}
+            onMouseEnter={() => onHover({ name: entity.name, type })}
             className={`px-2 py-1 rounded cursor-pointer flex items-center gap-2 ${
               isSelected ? 'bg-amber-100 ring-1 ring-amber-400' : 'hover:bg-gray-100'
             }`}
           >
-            {/* Recency indicator dot */}
             <div
               className="w-2 h-2 rounded-full shrink-0"
               style={{ backgroundColor: getRecencyColor(recencyRatio) }}
             />
-
-            {/* Entity name */}
             <div className="flex-1 text-xs font-medium truncate">
               {entity.name}
             </div>
-
-            {/* Frequency bar */}
             <div className="w-10 h-1 bg-gray-200 rounded-full overflow-hidden">
               <div
                 className="h-full bg-blue-500 rounded-full"
                 style={{ width: `${barWidth}%` }}
               />
             </div>
-
-            {/* Appearance count */}
             <div className="text-xs text-gray-500 w-5 text-right">
               {entity.episodes.length}
             </div>
           </div>
         );
       })}
-    </div>
+    </>
   ));
+
 
 
   // ========================================================================
@@ -1024,24 +1066,39 @@ function App() {
                   Each cell = one episode. Select a guest or character to highlight.
                 </p>
               </div>
-              {/* Filter checkbox for live episodes */}
-              <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={includeLiveEps}
-                  onChange={(e) => setIncludeLiveEps(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="flex items-center gap-1">
-                  Include live eps
-                  {includeLiveEps && (
-                    <span
-                      className="inline-block w-2.5 h-2.5 rounded-sm"
-                      style={{ backgroundColor: EPISODE_LIVE_COLOR }}
-                    />
-                  )}
-                </span>
-              </label>
+              <div className="flex items-center gap-3">
+                {/* Color mode dropdown */}
+                <label className="flex items-center gap-2 text-xs text-gray-600">
+                  <span>Color by:</span>
+                  <select
+                    value={colorMode}
+                    onChange={(e) => setColorMode(e.target.value)}
+                    className="text-xs border border-gray-300 rounded px-2 py-1 bg-white cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option value="guests">Guests</option>
+                    <option value="characters">Characters</option>
+                    <option value="chars-per-guest">Chars/Guest</option>
+                  </select>
+                </label>
+                {/* Filter checkbox for live episodes */}
+                <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={includeLiveEps}
+                    onChange={(e) => setIncludeLiveEps(e.target.checked)}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="flex items-center gap-1">
+                    Include live eps
+                    {includeLiveEps && (
+                      <span
+                        className="inline-block w-2.5 h-2.5 rounded-sm"
+                        style={{ backgroundColor: EPISODE_LIVE_COLOR }}
+                      />
+                    )}
+                  </span>
+                </label>
+              </div>
             </div>
             <Timeline />
             <EpisodeSummary />
@@ -1103,7 +1160,19 @@ function App() {
                 ))}
               </div>
 
-              <EntityList />
+              {/* Scroll container inline to preserve scroll position across re-renders */}
+              <div
+                className="space-y-0.5 max-h-[40vh] overflow-y-auto scrollbar-thin pr-1"
+                onMouseLeave={() => setHoveredEntity(null)}
+              >
+                <EntityListItems
+                  entities={sortedEntities.slice(0, 100)}
+                  selected={selectedEntity}
+                  type={entityType}
+                  onSelect={setSelectedEntity}
+                  onHover={setHoveredEntity}
+                />
+              </div>
             </div>
 
             {/* Detail panel */}
@@ -1115,25 +1184,23 @@ function App() {
 
         {/* Legend */}
         <div className="mt-4 bg-white rounded-lg p-3 shadow-sm">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
-            {/* Episode density legend */}
+          <div className="flex justify-between items-center text-xs">
+            {/* Color scale legend - changes based on selected mode */}
             <div className="flex items-center gap-1">
               <div className="flex gap-0.5">
-                {[0.3, 0.6, 1].map(i => (
+                {[0, 0.5, 1].map(ratio => (
                   <div
-                    key={i}
+                    key={ratio}
                     className="w-2.5 h-2.5 rounded-sm"
-                    style={{ backgroundColor: `hsl(210,50%,${75 - i * 30}%)` }}
+                    style={{ backgroundColor: `hsl(210, 50%, ${85 - ratio * 40}%)` }}
                   />
                 ))}
               </div>
-              <span className="text-gray-500">Episode density</span>
-            </div>
-
-            {/* Highlight legend */}
-            <div className="flex items-center gap-1">
-              <div className="w-2.5 h-2.5 rounded-sm bg-amber-500" />
-              <span className="text-gray-500">Selected appears</span>
+              <span className="text-gray-500">
+                {colorMode === 'characters' && 'Fewer → More characters'}
+                {colorMode === 'chars-per-guest' && 'Fewer → More chars/guest'}
+                {colorMode === 'guests' && 'Fewer → More guests'}
+              </span>
             </div>
 
             {/* Recency legend */}
