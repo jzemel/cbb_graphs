@@ -21,9 +21,10 @@ const { useState, useMemo, useCallback, useEffect } = React;
 // Episode cell colors
 const EPISODE_DEFAULT_COLOR = 'hsl(210, 50%, 60%)';     // Blue for regular episodes
 const EPISODE_LIVE_COLOR = '#EE6C4D';                   // Coral/orange for live episodes
-const EPISODE_HIGHLIGHT_COLOR = 'hsl(45, 100%, 51%)';  // Bright amber for selected entity
+const EPISODE_PRIMARY_COLOR = 'hsl(45, 100%, 51%)';    // Bright amber for primary entity
+const EPISODE_SECONDARY_COLOR = '#59CD90';              // Green for secondary entity
+const EPISODE_BOTH_COLOR = '#E8FF15';                   // Yellow-green for both entities
 const EPISODE_HOVER_COLOR = '#004777';                  // Dark blue for hover fill
-const ENTITY_HOVER_COLOR = 'hsl(45, 100%, 51%)';       // Bright amber for entity hover
 
 // Episode cell outline/stroke
 const HOVER_OUTLINE_WIDTH = '3px';                      // Outline width when hovering
@@ -345,8 +346,9 @@ function App() {
   // Process the raw data using useMemo (only recomputes when rawData changes)
   const data = useMemo(() => loadData(rawData), [rawData]);
 
-  // Currently selected guest or character name (or null if none selected)
-  const [selectedEntity, setSelectedEntity] = useState(null);
+  // Currently selected guest or character names (primary=yellow, secondary=green)
+  const [primaryEntity, setPrimaryEntity] = useState(null);
+  const [secondaryEntity, setSecondaryEntity] = useState(null);
 
   // Whether we're viewing 'guest' or 'character' mode
   const [entityType, setEntityType] = useState('guest');
@@ -527,15 +529,33 @@ function App() {
   }, [colorMode, episodes, characterMap]);
 
   /**
-   * Check if an episode features the currently selected entity.
-   * useCallback caches this function so it doesn't get recreated on every render.
+   * Check if an episode features a specific entity.
    */
-  const episodeHasEntity = useCallback((ep) => {
-    if (!selectedEntity) return false;
+  const episodeHasEntity = useCallback((ep, entityName) => {
+    if (!entityName) return false;
     return entityType === 'guest'
-      ? ep.guests.includes(selectedEntity)
-      : ep.characters.includes(selectedEntity);
-  }, [selectedEntity, entityType]);
+      ? ep.guests.includes(entityName)
+      : ep.characters.includes(entityName);
+  }, [entityType]);
+
+  /**
+   * Handle entity selection (click on entity in list or episode summary).
+   * - Click on primary → unselect primary
+   * - Click on secondary → unselect secondary
+   * - Click on unselected when no primary → set as primary
+   * - Click on unselected when primary exists → set/replace secondary
+   */
+  const handleEntityClick = useCallback((name) => {
+    if (name === primaryEntity) {
+      setPrimaryEntity(null);
+    } else if (name === secondaryEntity) {
+      setSecondaryEntity(null);
+    } else if (!primaryEntity) {
+      setPrimaryEntity(name);
+    } else {
+      setSecondaryEntity(name);
+    }
+  }, [primaryEntity, secondaryEntity]);
 
   // Month labels and their approximate starting weeks (for timeline header)
   const months = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
@@ -565,8 +585,9 @@ function App() {
             ? yearEps
             : yearEps.filter(ep => !isLiveEpisode(ep));
 
-          // Count how many episodes feature the selected entity
-          const highlightedCount = filteredYearEps.filter(episodeHasEntity).length;
+          // Count how many episodes feature each selected entity
+          const primaryCount = primaryEntity ? filteredYearEps.filter(ep => episodeHasEntity(ep, primaryEntity)).length : 0;
+          const secondaryCount = secondaryEntity ? filteredYearEps.filter(ep => episodeHasEntity(ep, secondaryEntity)).length : 0;
 
           return (
             <div key={year} className="flex items-center">
@@ -588,7 +609,8 @@ function App() {
                 }}
               >
                 {filteredYearEps.map((ep) => {
-                  const hasHighlight = episodeHasEntity(ep);
+                  const hasPrimary = episodeHasEntity(ep, primaryEntity);
+                  const hasSecondary = episodeHasEntity(ep, secondaryEntity);
                   const isPinned = ep.idx === pinnedEpisode;
 
                   // Check if this episode contains the hovered entity
@@ -597,12 +619,25 @@ function App() {
                     (hoveredEntity.type === 'character' && ep.characters.includes(hoveredEntity.name))
                   );
 
+                  // Determine if hovering would select as secondary (primary exists and hovering something else)
+                  const wouldBeSecondary = hoveredEntity && primaryEntity && hoveredEntity.name !== primaryEntity;
+
                   // Determine cell background color based on state
                   let bgColor;
                   if (hasHoveredEntity) {
-                    bgColor = ENTITY_HOVER_COLOR;
-                  } else if (hasHighlight) {
-                    bgColor = EPISODE_HIGHLIGHT_COLOR;
+                    if (wouldBeSecondary && hasPrimary) {
+                      bgColor = EPISODE_BOTH_COLOR;  // Overlap: hovering future-secondary + has primary
+                    } else if (wouldBeSecondary) {
+                      bgColor = EPISODE_SECONDARY_COLOR;  // Hovering entity that would become secondary
+                    } else {
+                      bgColor = EPISODE_PRIMARY_COLOR;  // Hovering primary or would-be-primary
+                    }
+                  } else if (hasPrimary && hasSecondary) {
+                    bgColor = EPISODE_BOTH_COLOR;
+                  } else if (hasPrimary) {
+                    bgColor = EPISODE_PRIMARY_COLOR;
+                  } else if (hasSecondary) {
+                    bgColor = EPISODE_SECONDARY_COLOR;
                   } else if (isLiveEpisode(ep)) {
                     bgColor = EPISODE_LIVE_COLOR;
                   } else {
@@ -674,10 +709,12 @@ function App() {
               </div>
 
               {/* Episode count for this year */}
-              <div className="w-14 shrink-0 text-xs text-gray-500 pl-2 font-mono">
-                {highlightedCount > 0 ? (
-                  <span className="text-amber-600 font-bold">
-                    {highlightedCount}
+              <div className="w-20 shrink-0 text-xs text-gray-500 pl-2 font-mono">
+                {(primaryCount > 0 || secondaryCount > 0) ? (
+                  <span>
+                    {primaryCount > 0 && <span className="text-amber-600 font-bold">{primaryCount}</span>}
+                    {primaryCount > 0 && secondaryCount > 0 && <span className="text-gray-400">+</span>}
+                    {secondaryCount > 0 && <span className="text-green-500 font-bold">{secondaryCount}</span>}
                     <span className="text-gray-400">/{filteredYearEps.length}</span>
                   </span>
                 ) : (
@@ -793,23 +830,32 @@ function App() {
               className="flex flex-wrap gap-1"
               onMouseLeave={() => setHoveredEntity(null)}
             >
-              {ep.guests.length ? ep.guests.map((g) => (
-                <button
-                  key={g}
-                  onClick={() => {
-                    setEntityType('guest');
-                    setSelectedEntity(g);
-                  }}
-                  onMouseEnter={() => setHoveredEntity({ name: g, type: 'guest' })}
-                  className={`px-2 py-0.5 rounded text-xs transition-colors ${
-                    g === selectedEntity
-                      ? 'bg-amber-100 text-amber-800 ring-1 ring-amber-400'
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                  }`}
-                >
-                  {g}
-                </button>
-              )) : <span className="text-gray-400 text-xs">None</span>}
+              {ep.guests.length ? ep.guests.map((g) => {
+                const isPrimary = entityType === 'guest' && g === primaryEntity;
+                const isSecondary = entityType === 'guest' && g === secondaryEntity;
+                return (
+                  <button
+                    key={g}
+                    onClick={() => {
+                      if (entityType !== 'guest') {
+                        setEntityType('guest');
+                        setSecondaryEntity(null);
+                        setPrimaryEntity(g);
+                      } else {
+                        handleEntityClick(g);
+                      }
+                    }}
+                    onMouseEnter={() => setHoveredEntity({ name: g, type: 'guest' })}
+                    className={`px-2 py-0.5 rounded text-xs transition-colors ${
+                      isPrimary ? 'bg-amber-100 text-amber-800 ring-1 ring-amber-400' :
+                      isSecondary ? 'bg-green-100 text-green-800 ring-1 ring-green-400' :
+                      'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                    }`}
+                  >
+                    {g}
+                  </button>
+                );
+              }) : <span className="text-gray-400 text-xs">None</span>}
             </div>
           </div>
 
@@ -820,23 +866,32 @@ function App() {
               className="flex flex-wrap gap-1"
               onMouseLeave={() => setHoveredEntity(null)}
             >
-              {ep.characters.length ? ep.characters.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => {
-                    setEntityType('character');
-                    setSelectedEntity(c);
-                  }}
-                  onMouseEnter={() => setHoveredEntity({ name: c, type: 'character' })}
-                  className={`px-2 py-0.5 rounded text-xs transition-colors ${
-                    c === selectedEntity
-                      ? 'bg-amber-100 text-amber-800 ring-1 ring-amber-400'
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                  }`}
-                >
-                  {c}
-                </button>
-              )) : <span className="text-gray-400 text-xs">None</span>}
+              {ep.characters.length ? ep.characters.map((c) => {
+                const isPrimary = entityType === 'character' && c === primaryEntity;
+                const isSecondary = entityType === 'character' && c === secondaryEntity;
+                return (
+                  <button
+                    key={c}
+                    onClick={() => {
+                      if (entityType !== 'character') {
+                        setEntityType('character');
+                        setSecondaryEntity(null);
+                        setPrimaryEntity(c);
+                      } else {
+                        handleEntityClick(c);
+                      }
+                    }}
+                    onMouseEnter={() => setHoveredEntity({ name: c, type: 'character' })}
+                    className={`px-2 py-0.5 rounded text-xs transition-colors ${
+                      isPrimary ? 'bg-amber-100 text-amber-800 ring-1 ring-amber-400' :
+                      isSecondary ? 'bg-green-100 text-green-800 ring-1 ring-green-400' :
+                      'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                    }`}
+                  >
+                    {c}
+                  </button>
+                );
+              }) : <span className="text-gray-400 text-xs">None</span>}
             </div>
           </div>
         </div>
@@ -858,20 +913,23 @@ function App() {
    *
    * Scroll container is kept outside memoized content to preserve scroll position.
    */
-  const EntityListItems = React.memo(({ entities, selected, type, onSelect, onHover }) => (
+  const EntityListItems = React.memo(({ entities, primary, secondary, type, onSelect, onHover }) => (
     <>
       {entities.map((entity) => {
-        const isSelected = selected === entity.name;
+        const isPrimary = primary === entity.name;
+        const isSecondary = secondary === entity.name;
         const recencyRatio = entity.lastIdx / (episodes.length - 1);
         const barWidth = (entity.episodes.length / (entities[0]?.episodes.length || 1)) * 100;
 
         return (
           <div
             key={entity.name}
-            onClick={() => onSelect(isSelected ? null : entity.name)}
+            onClick={() => onSelect(entity.name)}
             onMouseEnter={() => onHover({ name: entity.name, type })}
             className={`px-2 py-1 rounded cursor-pointer flex items-center gap-2 ${
-              isSelected ? 'bg-amber-100 ring-1 ring-amber-400' : 'hover:bg-gray-100'
+              isPrimary ? 'bg-amber-100 ring-1 ring-amber-400' :
+              isSecondary ? 'bg-green-100 ring-1 ring-green-400' :
+              'hover:bg-gray-100'
             }`}
           >
             <div
@@ -909,7 +967,7 @@ function App() {
    */
   const EntityDetail = () => {
     // Show placeholder if nothing selected
-    if (!selectedEntity) {
+    if (!primaryEntity) {
       return (
         <div className="text-gray-400 text-center py-6 text-sm">
           Select a {entityType} to see details
@@ -917,7 +975,7 @@ function App() {
       );
     }
 
-    const entity = entityLookup.get(selectedEntity);
+    const entity = entityLookup.get(primaryEntity);
     if (!entity) return null;
 
     const firstEp = episodes[entity.firstIdx];
@@ -933,9 +991,9 @@ function App() {
 
     // Build list of related entities
     const related = [];
-    if (entityType === 'guest' && guestCharacters[selectedEntity]) {
+    if (entityType === 'guest' && guestCharacters[primaryEntity]) {
       // For guests: show characters they play
-      guestCharacters[selectedEntity].forEach(c => {
+      guestCharacters[primaryEntity].forEach(c => {
         const charData = characterMap.get(c);
         if (charData) {
           related.push({ name: c, count: charData.episodes.length, type: 'character' });
@@ -960,7 +1018,7 @@ function App() {
           {/* Image thumbnail (if available) - clickable link to wiki */}
           {entity.imageUrl && (
             <a
-              href={getWikiUrl(selectedEntity)}
+              href={getWikiUrl(primaryEntity)}
               target="_blank"
               rel="noopener noreferrer"
               className="shrink-0 hover:opacity-80 transition-opacity"
@@ -976,12 +1034,12 @@ function App() {
           )}
           <div className="flex-1 min-w-0">
             <a
-              href={getWikiUrl(selectedEntity)}
+              href={getWikiUrl(primaryEntity)}
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-blue-600 transition-colors"
             >
-              <h3 className="font-bold truncate">{selectedEntity}</h3>
+              <h3 className="font-bold truncate">{primaryEntity}</h3>
             </a>
             <div className="text-sm text-gray-500">
               {entity.episodes.length} appearances
@@ -1055,7 +1113,8 @@ function App() {
                   key={r.name}
                   onClick={() => {
                     setEntityType(r.type);
-                    setSelectedEntity(r.name);
+                    setSecondaryEntity(null);
+                    setPrimaryEntity(r.name);
                   }}
                   onMouseEnter={() => setHoveredEntity({ name: r.name, type: r.type })}
                   className="px-2 py-0.5 bg-gray-100 hover:bg-gray-200 rounded text-xs"
@@ -1176,7 +1235,8 @@ function App() {
                     key={t}
                     onClick={() => {
                       setEntityType(t);
-                      setSelectedEntity(null);
+                      setPrimaryEntity(null);
+                      setSecondaryEntity(null);
                       setSearchQuery('');
                     }}
                     className={`flex-1 px-2 py-1.5 rounded-lg text-xs font-medium ${
@@ -1228,9 +1288,10 @@ function App() {
               >
                 <EntityListItems
                   entities={sortedEntities.slice(0, 100)}
-                  selected={selectedEntity}
+                  primary={primaryEntity}
+                  secondary={secondaryEntity}
                   type={entityType}
-                  onSelect={setSelectedEntity}
+                  onSelect={handleEntityClick}
                   onHover={setHoveredEntity}
                 />
               </div>
