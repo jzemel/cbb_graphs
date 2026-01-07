@@ -111,22 +111,41 @@ const isLiveEpisode = (episode) => {
 };
 
 /**
- * Get the base color for an episode cell based on the number of guests.
- * Uses a blue color scale where intensity increases with more guests.
+ * Get the base color for an episode cell based on a numeric value.
+ * Uses a blue color scale where intensity increases with higher values.
  *
- * @param {number} guestCount - Number of guests in the episode
- * @param {number} maxGuests - Maximum guests across all episodes
+ * @param {number} value - The value for this episode
+ * @param {number} maxValue - Maximum value across all episodes
  * @returns {string} CSS HSL color string
  */
-const getEpisodeBaseColor = (guestCount, maxGuests) => {
-  if (maxGuests === 0) return 'hsl(210, 50%, 60%)';
+const getEpisodeBaseColor = (value, maxValue) => {
+  if (maxValue === 0) return 'hsl(210, 50%, 60%)';
 
-  // Map guest count to lightness: fewer guests = lighter, more guests = darker
+  // Map value to lightness: lower = lighter, higher = darker
   // Range: 85% (lightest) to 45% (darkest)
-  const ratio = guestCount / maxGuests;
+  const ratio = value / maxValue;
   const lightness = 85 - (ratio * 40);
 
   return `hsl(210, 50%, ${lightness}%)`;
+};
+
+/**
+ * Get character ages for an episode.
+ * Character age = episodes since debut (0 on debut episode).
+ *
+ * @param {Object} ep - Episode object
+ * @param {Map} characterMap - Map of character name -> character data
+ * @returns {{ min: number|null, max: number|null }} Min and max character ages
+ */
+const getEpisodeCharacterAges = (ep, characterMap) => {
+  if (!ep.characters || ep.characters.length === 0) {
+    return { min: null, max: null };
+  }
+  const ages = ep.characters.map(c => {
+    const charData = characterMap.get(c);
+    return charData ? ep.idx - charData.firstIdx : 0;
+  });
+  return { min: Math.min(...ages), max: Math.max(...ages) };
 };
 
 
@@ -491,6 +510,22 @@ function App() {
   // Get the right lookup map for the current entity type
   const entityLookup = entityType === 'guest' ? guestMap : characterMap;
 
+  // Compute max character age stats lazily (only when needed for color mode)
+  const characterAgeStats = useMemo(() => {
+    if (!colorMode.includes('char-age')) return null;
+
+    let maxOfMinAge = 0;  // Max across eps of "min char age" (for scaling newest mode)
+    let maxOfMaxAge = 0;  // Max across eps of "max char age" (for scaling oldest mode)
+
+    episodes.forEach(ep => {
+      const ages = getEpisodeCharacterAges(ep, characterMap);
+      if (ages.min !== null) maxOfMinAge = Math.max(maxOfMinAge, ages.min);
+      if (ages.max !== null) maxOfMaxAge = Math.max(maxOfMaxAge, ages.max);
+    });
+
+    return { maxOfMinAge, maxOfMaxAge };
+  }, [colorMode, episodes, characterMap]);
+
   /**
    * Check if an episode features the currently selected entity.
    * useCallback caches this function so it doesn't get recreated on every render.
@@ -579,6 +614,30 @@ function App() {
                       case 'chars-per-guest':
                         bgColor = getEpisodeBaseColor(ep.characters_per_guest, data.stats.maxCharactersPerGuest);
                         break;
+                      case 'newest-char-age': {
+                        const ages = getEpisodeCharacterAges(ep, characterMap);
+                        if (ages.min === null) {
+                          bgColor = 'hsl(210, 50%, 90%)';  // Light gray for eps with no characters
+                        } else if (ages.min === 0) {
+                          bgColor = '#AF7595';  // Mauve for character debuts
+                        } else {
+                          // Scale ages 1+ using the normal blue scale (subtract 1 so age=1 is lightest)
+                          bgColor = getEpisodeBaseColor(ages.min - 1, (characterAgeStats?.maxOfMinAge || 1) - 1);
+                        }
+                        break;
+                      }
+                      case 'oldest-char-age': {
+                        const ages = getEpisodeCharacterAges(ep, characterMap);
+                        if (ages.max === null) {
+                          bgColor = 'hsl(210, 50%, 90%)';  // Light gray for eps with no characters
+                        } else if (ages.max === 0) {
+                          bgColor = '#AF7595';  // Mauve for all-debut episodes
+                        } else {
+                          // Scale ages 1+ using the normal blue scale (subtract 1 so age=1 is lightest)
+                          bgColor = getEpisodeBaseColor(ages.max - 1, (characterAgeStats?.maxOfMaxAge || 1) - 1);
+                        }
+                        break;
+                      }
                       default: // 'guests'
                         bgColor = getEpisodeBaseColor(ep.num_guests, data.stats.maxGuests);
                     }
@@ -1075,9 +1134,11 @@ function App() {
                     onChange={(e) => setColorMode(e.target.value)}
                     className="text-xs border border-gray-300 rounded px-2 py-1 bg-white cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-500"
                   >
-                    <option value="guests">Guests</option>
-                    <option value="characters">Characters</option>
-                    <option value="chars-per-guest">Chars/Guest</option>
+                    <option value="guests">Number of Guests</option>
+                    <option value="characters">Number of Characs</option>
+                    <option value="chars-per-guest">Characters per Guest</option>
+                    <option value="newest-char-age">Debut/Eps of Newest Character</option>
+                    <option value="oldest-char-age">Debut/Eps of Oldest Character</option>
                   </select>
                 </label>
                 {/* Filter checkbox for live episodes */}
@@ -1188,6 +1249,12 @@ function App() {
             {/* Color scale legend - changes based on selected mode */}
             <div className="flex items-center gap-1">
               <div className="flex gap-0.5">
+                {(colorMode === 'newest-char-age' || colorMode === 'oldest-char-age') && (
+                  <div
+                    className="w-2.5 h-2.5 rounded-sm"
+                    style={{ backgroundColor: '#AF7595' }}
+                  />
+                )}
                 {[0, 0.5, 1].map(ratio => (
                   <div
                     key={ratio}
@@ -1200,6 +1267,8 @@ function App() {
                 {colorMode === 'characters' && 'Fewer → More characters'}
                 {colorMode === 'chars-per-guest' && 'Fewer → More chars/guest'}
                 {colorMode === 'guests' && 'Fewer → More guests'}
+                {colorMode === 'newest-char-age' && 'Debut → Older newest character'}
+                {colorMode === 'oldest-char-age' && 'Debut → Older oldest character'}
               </span>
             </div>
 
