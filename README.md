@@ -3,4 +3,4 @@ Data visualization for CBB podcast, guests and characters. See who made appearan
 
 Links out to the cbb fandom wiki and to earwolf to play the eps. All data from (and credit to) the fandom API and the wiki editors.
 
-Served from github pages, accessible at https://cbbgraphs.com OR https://jzemel.github.io/cbb_graphs
+Served from github pages, accessible at https://cbbgraph.com OR https://jzemel.github.io/cbb_graphs

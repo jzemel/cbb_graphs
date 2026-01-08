@@ -1202,7 +1202,7 @@ function App() {
         {/* Main flex layout */}
         <div className="flex gap-4">
           {/* Timeline panel - expands to fill space */}
-          <div ref={timelineContainerRef} className="flex-1 min-w-[600px] bg-white rounded-xl p-4 shadow-sm">
+          <div ref={timelineContainerRef} className="flex-1 min-w-[600px] bg-white rounded-xl p-4 shadow-sm flex flex-col">
             <div className="mb-3 flex items-start justify-between">
               <div>
                 <h2 className="font-semibold text-gray-800 text-sm">Episode Timeline</h2>
@@ -1246,8 +1246,32 @@ function App() {
                 </label>
               </div>
             </div>
-            <Timeline />
-            <EpisodeSummary />
+            <div className="flex-1 min-h-0">
+              <Timeline />
+              <EpisodeSummary />
+            </div>
+
+            {/* Credit text - always visible at bottom */}
+            <div className="mt-4 pt-3 border-t border-gray-100 text-center text-xs italic text-gray-500">
+              All data from (and credit to) the{' '}
+              <a
+                href="https://comedybangbang.fandom.com/wiki/Main_Page"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800"
+              >
+                fandom API
+              </a>
+              {' '}and wiki editors. See on{' '}
+              <a
+                href="https://github.com/jzemel/cbb_graphs"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800"
+              >
+                github
+              </a>.
+            </div>
           </div>
 
           {/* Right sidebar - fixed width */}
