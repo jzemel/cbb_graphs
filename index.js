@@ -575,7 +575,16 @@ function App() {
    */
   const Timeline = () => {
     return (
-      <div className="space-y-0.5">
+      <div
+        className="space-y-0.5"
+        onMouseLeave={() => {
+          // Clear any pending debounced hover and immediately clear state
+          if (hoverTimeoutRef.current) {
+            clearTimeout(hoverTimeoutRef.current);
+          }
+          setHoveredEpisode(null);
+        }}
+      >
         {/* One row per year */}
         {years.map(year => {
           const yearEps = episodesByYear.get(year) || [];
@@ -600,13 +609,6 @@ function App() {
               <div
                 className="flex"
                 style={{ gap: 1 }}
-                onMouseLeave={() => {
-                  // Clear any pending debounced hover and immediately clear state
-                  if (hoverTimeoutRef.current) {
-                    clearTimeout(hoverTimeoutRef.current);
-                  }
-                  setHoveredEpisode(null);
-                }}
               >
                 {filteredYearEps.map((ep) => {
                   const hasPrimary = episodeHasEntity(ep, primaryEntity);
@@ -759,25 +761,37 @@ function App() {
 
     return (
       <div className="mt-4 pt-4 border-t border-gray-100" data-episode-summary>
-        {/* Episode header with optional image */}
+        {/* Episode header with image placeholder */}
         <div className="flex gap-4 mb-3">
-          {/* Episode image (if available) - clickable link to wiki */}
-          {ep.imageUrl && (
-            <a
-              href={getWikiUrl(ep.title)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="shrink-0 hover:opacity-80 transition-opacity"
-            >
+          {/* Episode image or placeholder */}
+          <a
+            href={getWikiUrl(ep.title)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 hover:opacity-80 transition-opacity"
+          >
+            {ep.imageUrl ? (
               <img
                 src={ep.imageUrl}
                 alt={ep.title}
-                className="w-24 h-24 rounded-lg object-cover"
+                className="w-24 h-24 rounded-lg object-cover bg-gray-100"
                 referrerPolicy="no-referrer"
-                onError={(e) => { e.target.parentElement.style.display = 'none'; }}
+                onError={(e) => {
+                  // Replace failed image with placeholder
+                  e.target.style.display = 'none';
+                  e.target.nextElementSibling.style.display = 'flex';
+                }}
               />
-            </a>
-          )}
+            ) : null}
+            <div
+              className="w-24 h-24 rounded-lg bg-gray-100 flex items-center justify-center"
+              style={{ display: ep.imageUrl ? 'none' : 'flex' }}
+            >
+              <svg className="w-12 h-12 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+              </svg>
+            </div>
+          </a>
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between">
               <div>
@@ -970,7 +984,7 @@ function App() {
     if (!primaryEntity) {
       return (
         <div className="text-gray-400 text-center py-6 text-sm">
-          Select a {entityType} to see details
+          Select a {entityType} to see details. Select two to see overlap.
         </div>
       );
     }
@@ -1013,25 +1027,37 @@ function App() {
 
     return (
       <div className="space-y-3">
-        {/* Header with name, count, and optional image - links to Fandom wiki */}
+        {/* Header with name, count, and image placeholder */}
         <div className="flex gap-3">
-          {/* Image thumbnail (if available) - clickable link to wiki */}
-          {entity.imageUrl && (
-            <a
-              href={getWikiUrl(primaryEntity)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="shrink-0 hover:opacity-80 transition-opacity"
-            >
+          {/* Image thumbnail or placeholder */}
+          <a
+            href={getWikiUrl(primaryEntity)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 hover:opacity-80 transition-opacity"
+          >
+            {entity.imageUrl ? (
               <img
                 src={entity.imageUrl}
                 alt={entity.name}
-                className="w-16 h-16 rounded-lg object-cover"
+                className="w-16 h-16 rounded-lg object-cover bg-gray-100"
                 referrerPolicy="no-referrer"
-                onError={(e) => { e.target.parentElement.style.display = 'none'; }}
+                onError={(e) => {
+                  // Replace failed image with placeholder
+                  e.target.style.display = 'none';
+                  e.target.nextElementSibling.style.display = 'flex';
+                }}
               />
-            </a>
-          )}
+            ) : null}
+            <div
+              className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center"
+              style={{ display: entity.imageUrl ? 'none' : 'flex' }}
+            >
+              <svg className="w-8 h-8 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+              </svg>
+            </div>
+          </a>
           <div className="flex-1 min-w-0">
             <a
               href={getWikiUrl(primaryEntity)}
