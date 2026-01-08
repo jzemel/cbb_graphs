@@ -775,7 +775,7 @@ function App() {
                 src={ep.imageUrl}
                 alt={ep.title}
                 className="w-24 h-24 rounded-lg object-cover bg-gray-100"
-                referrerPolicy="no-referrer"
+                loading="lazy"
                 onError={(e) => {
                   // Replace failed image with placeholder
                   e.target.style.display = 'none';
@@ -1041,7 +1041,7 @@ function App() {
                 src={entity.imageUrl}
                 alt={entity.name}
                 className="w-16 h-16 rounded-lg object-cover bg-gray-100"
-                referrerPolicy="no-referrer"
+                loading="lazy"
                 onError={(e) => {
                   // Replace failed image with placeholder
                   e.target.style.display = 'none';
