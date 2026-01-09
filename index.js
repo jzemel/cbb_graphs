@@ -237,23 +237,19 @@ const loadData = (raw) => {
       gData.lastIdx = idx;  // Update last appearance
     });
 
-    // Process characters (similar to guests, but also tracks who plays them)
+    // Process characters
     ep.characters.forEach(c => {
       if (!characterMap.has(c)) {
         characterMap.set(c, {
           name: c,
           episodes: [],
           firstIdx: idx,
-          lastIdx: idx,
-          guests: new Set()  // Track all guests who have played this character
+          lastIdx: idx
         });
       }
       const cData = characterMap.get(c);
       cData.episodes.push(idx);
       cData.lastIdx = idx;
-      // Associate this character with all guests in the episode
-      // TODO this is a squishy assignment of guest-character, should fix at some point?
-      ep.guests.forEach(g => cData.guests.add(g));
     });
   });
 
@@ -273,16 +269,25 @@ const loadData = (raw) => {
   // Guest-to-character mapping from the data file
   const guestCharacters = raw.guestCharacters || {};
 
+  // Build inverse mapping: character -> guest who plays them
+  const characterGuests = {};
+  Object.entries(guestCharacters).forEach(([guest, chars]) => {
+    chars.forEach(char => {
+      characterGuests[char] = guest;  // Each character maps to ONE guest
+    });
+  });
+
   // Image URL lookups for guests and characters
   const guestImages = raw.guestImages || {};
   const characterImages = raw.characterImages || {};
 
-  // Add image URLs to guest and character maps
+  // Add image URLs and guest associations to guest and character maps
   guestMap.forEach((guest, name) => {
     guest.imageUrl = guestImages[name] || null;
   });
   characterMap.forEach((char, name) => {
     char.imageUrl = characterImages[name] || null;
+    char.playedBy = characterGuests[name] || null;  // Add the correct guest
   });
 
   // Calculate max values for color scaling
@@ -445,6 +450,23 @@ function App() {
   // Format: { name: string, type: 'guest' | 'character' } or null
   const [hoveredEntity, setHoveredEntity] = useState(null);
 
+  // Debounced hover for entity list - prevents re-renders from interfering with clicks in Safari
+  const entityHoverTimeoutRef = React.useRef(null);
+  const setHoveredEntityDebounced = useCallback((entity) => {
+    if (entityHoverTimeoutRef.current) {
+      clearTimeout(entityHoverTimeoutRef.current);
+    }
+    if (entity === null) {
+      // Clear immediately on mouse leave
+      setHoveredEntity(null);
+    } else {
+      // Small delay on hover to prevent click interference
+      entityHoverTimeoutRef.current = setTimeout(() => {
+        setHoveredEntity(entity);
+      }, 30);
+    }
+  }, []);
+
   // Debounced hover state for episode summary (prevents excessive re-renders)
   const hoverTimeoutRef = React.useRef(null);
   const setHoveredEpisodeDebounced = useCallback((idx) => {
@@ -508,6 +530,9 @@ function App() {
         return entities;
     }
   }, [guestMap, characterMap, entityType, sortBy, searchQuery]);
+
+  // Memoize the sliced entities to prevent unnecessary re-renders of EntityListItems
+  const displayedEntities = useMemo(() => sortedEntities.slice(0, 100), [sortedEntities]);
 
   // Get the right lookup map for the current entity type
   const entityLookup = entityType === 'guest' ? guestMap : characterMap;
@@ -776,6 +801,8 @@ function App() {
                 alt={ep.title}
                 className="w-24 h-24 rounded-lg object-cover bg-gray-100"
                 loading="lazy"
+                referrerPolicy="no-referrer"
+                crossOrigin="anonymous"
                 onError={(e) => {
                   // Replace failed image with placeholder
                   e.target.style.display = 'none';
@@ -913,6 +940,15 @@ function App() {
     );
   };
 
+  // Memoize EpisodeSummary output to prevent re-renders on entity hover
+  const memoizedEpisodeSummary = useMemo(() => <EpisodeSummary />, [
+    pinnedEpisode,
+    hoveredEpisode,
+    entityType,
+    primaryEntity,
+    secondaryEntity
+  ]);
+
 
   // ========================================================================
   // ENTITY LIST COMPONENT
@@ -936,33 +972,34 @@ function App() {
         const barWidth = (entity.episodes.length / (entities[0]?.episodes.length || 1)) * 100;
 
         return (
-          <div
+          <button
             key={entity.name}
+            type="button"
             onClick={() => onSelect(entity.name)}
             onMouseEnter={() => onHover({ name: entity.name, type })}
-            className={`px-2 py-1 rounded cursor-pointer flex items-center gap-2 ${
+            className={`w-full px-2 py-1 rounded cursor-pointer flex items-center gap-2 text-left ${
               isPrimary ? 'bg-amber-100 ring-1 ring-amber-400' :
               isSecondary ? 'bg-green-100 ring-1 ring-green-400' :
               'hover:bg-gray-100'
             }`}
           >
-            <div
-              className="w-2 h-2 rounded-full shrink-0"
+            <span
+              className="w-2 h-2 rounded-full shrink-0 pointer-events-none"
               style={{ backgroundColor: getRecencyColor(recencyRatio) }}
             />
-            <div className="flex-1 text-xs font-medium truncate">
+            <span className="flex-1 text-xs font-medium truncate pointer-events-none">
               {entity.name}
-            </div>
-            <div className="w-10 h-1 bg-gray-200 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-blue-500 rounded-full"
+            </span>
+            <span className="w-10 h-1 bg-gray-200 rounded-full overflow-hidden pointer-events-none">
+              <span
+                className="block h-full bg-blue-500 rounded-full"
                 style={{ width: `${barWidth}%` }}
               />
-            </div>
-            <div className="text-xs text-gray-500 w-5 text-right">
+            </span>
+            <span className="text-xs text-gray-500 w-5 text-right pointer-events-none">
               {entity.episodes.length}
-            </div>
-          </div>
+            </span>
+          </button>
         );
       })}
     </>
@@ -1013,15 +1050,16 @@ function App() {
           related.push({ name: c, count: charData.episodes.length, type: 'character' });
         }
       });
-    } else if (entityType === 'character' && entity.guests) {
-      // For characters: show guests who play them
-      entity.guests.forEach(g => {
+    } else if (entityType === 'character' && entity.playedBy) {
+      // For characters: show the guest who plays them
+      const guestData = guestMap.get(entity.playedBy);
+      if (guestData) {
         related.push({
-          name: g,
-          count: guestMap.get(g)?.episodes.length || 0,
+          name: entity.playedBy,
+          count: guestData.episodes.length,
           type: 'guest'
         });
-      });
+      }
     }
     related.sort((a, b) => b.count - a.count);
 
@@ -1042,6 +1080,8 @@ function App() {
                 alt={entity.name}
                 className="w-16 h-16 rounded-lg object-cover bg-gray-100"
                 loading="lazy"
+                referrerPolicy="no-referrer"
+                crossOrigin="anonymous"
                 onError={(e) => {
                   // Replace failed image with placeholder
                   e.target.style.display = 'none';
@@ -1076,20 +1116,26 @@ function App() {
         {/* First/Last appearance cards */}
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div
+            role="button"
+            tabIndex={0}
             className="bg-gray-50 hover:bg-amber-50 rounded p-2 cursor-pointer transition-colors"
             onMouseEnter={() => setHoveredEpisode(entity.firstIdx)}
             onMouseLeave={() => setHoveredEpisode(null)}
             onClick={() => setPinnedEpisode(pinnedEpisode === entity.firstIdx ? null : entity.firstIdx)}
+            onKeyDown={(e) => e.key === 'Enter' && setPinnedEpisode(pinnedEpisode === entity.firstIdx ? null : entity.firstIdx)}
           >
             <div className="text-gray-400">First</div>
             <div className="font-medium truncate text-amber-700 hover:text-amber-800">{firstEp.title}</div>
             <div className="text-gray-400">{firstEp.date.getFullYear()}</div>
           </div>
           <div
+            role="button"
+            tabIndex={0}
             className="bg-gray-50 hover:bg-amber-50 rounded p-2 cursor-pointer transition-colors"
             onMouseEnter={() => setHoveredEpisode(entity.lastIdx)}
             onMouseLeave={() => setHoveredEpisode(null)}
             onClick={() => setPinnedEpisode(pinnedEpisode === entity.lastIdx ? null : entity.lastIdx)}
+            onKeyDown={(e) => e.key === 'Enter' && setPinnedEpisode(pinnedEpisode === entity.lastIdx ? null : entity.lastIdx)}
           >
             <div className="text-gray-400">Latest</div>
             <div className="font-medium truncate text-amber-700 hover:text-amber-800">{lastEp.title}</div>
@@ -1155,6 +1201,13 @@ function App() {
     );
   };
 
+  // Memoize EntityDetail output to prevent re-renders on hover
+  const memoizedEntityDetail = useMemo(() => <EntityDetail />, [
+    primaryEntity,
+    entityType,
+    pinnedEpisode
+  ]);
+
 
   // ========================================================================
   // CLICK OUTSIDE HANDLER
@@ -1175,6 +1228,15 @@ function App() {
     const timelineCell = e.target.closest('[data-timeline-cell]');
     if (timelineCell) return;
 
+    // Check if click was on any interactive element (buttons, inputs, selects, links)
+    // This prevents Safari issues where background click interferes with element clicks
+    const interactiveEl = e.target.closest('button, input, select, a, [role="button"]');
+    if (interactiveEl) return;
+
+    // Check if click was inside the sidebar (entity list, detail panel)
+    const sidebar = e.target.closest('[data-sidebar]');
+    if (sidebar) return;
+
     // Unpin the episode
     setPinnedEpisode(null);
   };
@@ -1189,7 +1251,7 @@ function App() {
    * - Bottom: Legend
    */
   return (
-    <div className="min-h-screen bg-gray-50 p-3" onClick={handleBackgroundClick}>
+    <div className="min-h-screen bg-gray-50 p-3">
       <div className="max-w-screen-2xl mx-auto">
         {/* Header */}
         <div className="mb-4">
@@ -1248,7 +1310,7 @@ function App() {
             </div>
             <div className="flex-1 min-h-0">
               <Timeline />
-              <EpisodeSummary />
+              {memoizedEpisodeSummary}
             </div>
 
             {/* Credit text - always visible at bottom */}
@@ -1275,7 +1337,7 @@ function App() {
           </div>
 
           {/* Right sidebar - fixed width */}
-          <div className="w-80 shrink-0 flex flex-col gap-3 max-h-[calc(100vh-120px)]">
+          <div data-sidebar className="w-80 shrink-0 flex flex-col gap-3 max-h-[calc(100vh-120px)]">
             {/* Entity browser */}
             <div className="bg-white rounded-xl p-3 shadow-sm flex-shrink-0">
               {/* Guest/Character toggle */}
@@ -1334,22 +1396,22 @@ function App() {
               {/* Scroll container inline to preserve scroll position across re-renders */}
               <div
                 className="space-y-0.5 max-h-[40vh] overflow-y-auto scrollbar-thin pr-1"
-                onMouseLeave={() => setHoveredEntity(null)}
+                onMouseLeave={() => setHoveredEntityDebounced(null)}
               >
                 <EntityListItems
-                  entities={sortedEntities.slice(0, 100)}
+                  entities={displayedEntities}
                   primary={primaryEntity}
                   secondary={secondaryEntity}
                   type={entityType}
                   onSelect={handleEntityClick}
-                  onHover={setHoveredEntity}
+                  onHover={setHoveredEntityDebounced}
                 />
               </div>
             </div>
 
-            {/* Detail panel */}
+            {/* Detail panel - memoized to prevent re-renders on hover */}
             <div className="bg-white rounded-xl p-3 shadow-sm flex-1 overflow-y-auto min-h-0">
-              <EntityDetail />
+              {memoizedEntityDetail}
             </div>
           </div>
         </div>
