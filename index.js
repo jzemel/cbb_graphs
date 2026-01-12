@@ -221,20 +221,24 @@ const loadData = (raw) => {
 
   // Process each episode to build the lookup maps
   episodes.forEach((ep, idx) => {
+    const isLive = isLiveEpisode(ep);
+
     // Process guests
     ep.guests.forEach(g => {
       if (!guestMap.has(g)) {
         // First time seeing this guest - create their entry
         guestMap.set(g, {
           name: g,
-          episodes: [],   // Will hold indices of all their episodes
-          firstIdx: idx,  // Index of first appearance
-          lastIdx: idx    // Index of last appearance (updated below)
+          episodes: [],         // All episodes
+          regularEpisodes: [],  // Non-live episodes only
+          firstIdx: idx,
+          lastIdx: idx
         });
       }
       const gData = guestMap.get(g);
       gData.episodes.push(idx);
-      gData.lastIdx = idx;  // Update last appearance
+      if (!isLive) gData.regularEpisodes.push(idx);
+      gData.lastIdx = idx;
     });
 
     // Process characters
@@ -243,12 +247,14 @@ const loadData = (raw) => {
         characterMap.set(c, {
           name: c,
           episodes: [],
+          regularEpisodes: [],  // Non-live episodes only
           firstIdx: idx,
           lastIdx: idx
         });
       }
       const cData = characterMap.get(c);
       cData.episodes.push(idx);
+      if (!isLive) cData.regularEpisodes.push(idx);
       cData.lastIdx = idx;
     });
   });
@@ -502,6 +508,19 @@ function App() {
   // ------------------------------------------------------------------------
 
   /**
+   * Helper functions to get the correct episode list/count based on includeLiveEps state.
+   */
+  const getEntityEpisodes = useCallback((entity) =>
+    includeLiveEps ? entity.episodes : entity.regularEpisodes,
+    [includeLiveEps]
+  );
+
+  const getEntityCount = useCallback((entity) =>
+    includeLiveEps ? entity.episodes.length : entity.regularEpisodes.length,
+    [includeLiveEps]
+  );
+
+  /**
    * Get the sorted and filtered list of entities (guests or characters).
    * useMemo ensures this only recalculates when dependencies change.
    */
@@ -519,7 +538,7 @@ function App() {
     // Sort based on selected sort mode
     switch (sortBy) {
       case 'appearances':
-        return entities.sort((a, b) => b.episodes.length - a.episodes.length);
+        return entities.sort((a, b) => getEntityCount(b) - getEntityCount(a));
       case 'first':
         return entities.sort((a, b) => a.firstIdx - b.firstIdx);
       case 'last':
@@ -529,7 +548,7 @@ function App() {
       default:
         return entities;
     }
-  }, [guestMap, characterMap, entityType, sortBy, searchQuery]);
+  }, [guestMap, characterMap, entityType, sortBy, searchQuery, getEntityCount]);
 
   // Memoize the sliced entities to prevent unnecessary re-renders of EntityListItems
   const displayedEntities = useMemo(() => sortedEntities.slice(0, 100), [sortedEntities]);
@@ -969,7 +988,9 @@ function App() {
         const isPrimary = primary === entity.name;
         const isSecondary = secondary === entity.name;
         const recencyRatio = entity.lastIdx / (episodes.length - 1);
-        const barWidth = (entity.episodes.length / (entities[0]?.episodes.length || 1)) * 100;
+        const count = getEntityCount(entity);
+        const maxCount = entities[0] ? getEntityCount(entities[0]) : 1;
+        const barWidth = (count / maxCount) * 100;
 
         return (
           <button
@@ -997,7 +1018,7 @@ function App() {
               />
             </span>
             <span className="text-xs text-gray-500 w-5 text-right pointer-events-none">
-              {entity.episodes.length}
+              {count}
             </span>
           </button>
         );
@@ -1034,7 +1055,7 @@ function App() {
 
     // Count appearances per year for the bar chart
     const yearCounts = new Map();
-    entity.episodes.forEach(idx => {
+    getEntityEpisodes(entity).forEach(idx => {
       const year = episodes[idx].year;
       yearCounts.set(year, (yearCounts.get(year) || 0) + 1);
     });
@@ -1047,7 +1068,7 @@ function App() {
       guestCharacters[primaryEntity].forEach(c => {
         const charData = characterMap.get(c);
         if (charData) {
-          related.push({ name: c, count: charData.episodes.length, type: 'character' });
+          related.push({ name: c, count: getEntityCount(charData), type: 'character' });
         }
       });
     } else if (entityType === 'character' && entity.playedBy) {
@@ -1056,7 +1077,7 @@ function App() {
       if (guestData) {
         related.push({
           name: entity.playedBy,
-          count: guestData.episodes.length,
+          count: getEntityCount(guestData),
           type: 'guest'
         });
       }
@@ -1108,7 +1129,7 @@ function App() {
               <h3 className="font-bold truncate">{primaryEntity}</h3>
             </a>
             <div className="text-sm text-gray-500">
-              {entity.episodes.length} appearances
+              {getEntityCount(entity)} appearances
             </div>
           </div>
         </div>
@@ -1205,7 +1226,9 @@ function App() {
   const memoizedEntityDetail = useMemo(() => <EntityDetail />, [
     primaryEntity,
     entityType,
-    pinnedEpisode
+    pinnedEpisode,
+    getEntityCount,
+    getEntityEpisodes
   ]);
 
 
